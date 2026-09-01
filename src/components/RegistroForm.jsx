@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import logoBurgerFest from '../assets/logo-burgerfest.png';
+import logoIkaika from '../assets/logo-ikaika.png';
 
 const tastedOptions = ['1-2', '3-4', '5+'];
 
@@ -58,19 +60,21 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu }) {
     <main className="min-h-screen px-4 py-6">
       <section className="mx-auto w-full max-w-md">
         <header className="mb-7 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-dorado sm:text-sm">
+          <p className="inline-block border-2 border-vino-oscuro bg-crema px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-vino-oscuro shadow-hard sm:px-5 sm:py-2 sm:text-sm">
             El festival de hamburguesas · Maracaibo 2026
           </p>
-          <h1 className="mt-3 bg-gradient-to-b from-dorado via-dorado to-crema bg-clip-text font-display text-7xl font-extrabold uppercase leading-none text-transparent sm:text-8xl">
-            Burger Fest
-          </h1>
+          <img
+            src={logoBurgerFest}
+            alt="Burger Fest"
+            className="mx-auto mt-3 h-[163px] w-auto max-w-full sm:h-[222px]"
+          />
           <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-texto-suave">
             Registrate una vez y elige tu hamburguesa favorita en cada categoria.
           </p>
           <button
             type="button"
             onClick={onVerMenu}
-            className="tap-highlight-none mt-6 w-full border-2 border-vino-oscuro bg-dorado px-4 py-3 font-display text-xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm"
+            className="tap-highlight-none mt-6 w-full border-2 border-vino-oscuro bg-dorado px-4 py-4 font-display text-2xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm"
           >
             Ver menú completo
           </button>
@@ -195,6 +199,13 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu }) {
         </form>
         )}
       </section>
+
+      <footer className="mt-10 flex flex-col items-center gap-2 pb-2 text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-texto-suave/70">
+          Una producción de
+        </p>
+        <img src={logoIkaika} alt="IKAIKA" className="h-20 w-auto max-w-full opacity-80 sm:h-24" />
+      </footer>
     </main>
   );
 }

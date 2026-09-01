@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase.js';
+import logoBurgerFest from '../assets/logo-burgerfest.png';
+import logoIkaika from '../assets/logo-ikaika.png';
 
 const CATEGORIES = [
   {
@@ -227,9 +229,11 @@ export default function ResultadosPage() {
     <main className="min-h-screen bg-vino-fondo px-4 py-8 text-texto-suave sm:px-8 lg:px-12 xl:py-12">
       <div className="mx-auto max-w-7xl">
         <header className="border-b-4 border-dorado pb-6 text-center">
-          <p className="font-display text-lg font-bold uppercase tracking-[0.3em] text-dorado sm:text-2xl">
-            Burger Fest
-          </p>
+          <img
+            src={logoBurgerFest}
+            alt="Burger Fest"
+            className="mx-auto h-[101px] w-auto max-w-full sm:h-[142px] xl:h-[162px]"
+          />
           <h1 className="mt-2 font-display text-5xl font-extrabold uppercase leading-none text-crema sm:text-7xl xl:text-8xl">
             Resultados en vivo
           </h1>
@@ -259,6 +263,13 @@ export default function ResultadosPage() {
             ))}
           </div>
         )}
+
+        <footer className="mt-10 flex flex-col items-center gap-2 pb-2 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-texto-suave/70 sm:text-xs">
+            Una producción de
+          </p>
+          <img src={logoIkaika} alt="IKAIKA" className="h-24 w-auto max-w-full opacity-80 sm:h-28 xl:h-32" />
+        </footer>
       </div>
     </main>
   );
