@@ -11,6 +11,7 @@ export default defineConfig({
       input: {
         main: page('./index.html'),
         admin: page('./admin.html'),
+        resultados: page('./resultados.html'),
       },
     },
   },
