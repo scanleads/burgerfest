@@ -19,6 +19,10 @@ export default function GestionBurgers() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [editingBurger, setEditingBurger] = useState(null);
+  const [editForm, setEditForm] = useState({ nombre: '', restaurante: '', descripcion: '' });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
 
   async function loadBurgers() {
     setLoading(true);
@@ -26,7 +30,7 @@ export default function GestionBurgers() {
 
     const { data, error: burgersError } = await supabase
       .from('hamburguesas')
-      .select('id, nombre, restaurante, categoria, foto_url, orden, activa, creada_en')
+      .select('id, nombre, restaurante, categoria, foto_url, descripcion, orden, activa, creada_en')
       .order('categoria', { ascending: true })
       .order('orden', { ascending: true })
       .order('creada_en', { ascending: true });
@@ -95,6 +99,56 @@ export default function GestionBurgers() {
       current.map((item) => (item.id === burger.id ? { ...item, activa: !item.activa } : item)),
     );
     setMessage(`${burger.nombre} quedo ${burger.activa ? 'inactiva' : 'activa'}.`);
+  }
+
+  function openEdit(burger) {
+    setEditingBurger(burger);
+    setEditForm({
+      nombre: burger.nombre || '',
+      restaurante: burger.restaurante || '',
+      descripcion: burger.descripcion || '',
+    });
+    setEditError('');
+  }
+
+  function closeEdit() {
+    setEditingBurger(null);
+    setEditError('');
+    setEditSaving(false);
+  }
+
+  function updateEditField(field, value) {
+    setEditForm((current) => ({ ...current, [field]: value }));
+  }
+
+  async function handleEditSubmit(event) {
+    event.preventDefault();
+    if (!editingBurger) return;
+
+    setEditSaving(true);
+    setEditError('');
+
+    const payload = {
+      nombre: editForm.nombre.trim(),
+      restaurante: editForm.restaurante.trim(),
+      descripcion: editForm.descripcion.trim() || null,
+    };
+
+    const { error: updateError } = await supabase
+      .from('hamburguesas')
+      .update(payload)
+      .eq('id', editingBurger.id);
+
+    if (updateError) {
+      setEditError('No pudimos guardar los cambios.');
+      setEditSaving(false);
+      return;
+    }
+
+    setMessage(`${payload.nombre} actualizada.`);
+    setEditSaving(false);
+    setEditingBurger(null);
+    await loadBurgers();
   }
 
   return (
@@ -200,19 +254,96 @@ export default function GestionBurgers() {
                       </span>
                     </td>
                     <td className="px-3 py-3">
-                      <button
-                        className="border border-vino-oscuro bg-crema px-3 py-2 text-xs font-bold uppercase text-vino-oscuro"
-                        type="button"
-                        onClick={() => toggleActive(burger)}
-                      >
-                        {burger.activa ? 'Desactivar' : 'Activar'}
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          className="border border-vino-oscuro bg-dorado px-3 py-2 text-xs font-bold uppercase text-vino-oscuro"
+                          type="button"
+                          onClick={() => openEdit(burger)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="border border-vino-oscuro bg-crema px-3 py-2 text-xs font-bold uppercase text-vino-oscuro"
+                          type="button"
+                          onClick={() => toggleActive(burger)}
+                        >
+                          {burger.activa ? 'Desactivar' : 'Activar'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+        </div>
+      ) : null}
+
+      {editingBurger ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-vino-oscuro/80 p-4">
+          <div className="w-full max-w-lg border-2 border-vino-oscuro bg-vino p-5 shadow-hard">
+            <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-dorado">
+              Editar hamburguesa
+            </p>
+            <h3 className="mt-1 font-display text-3xl font-extrabold uppercase text-crema">
+              {editingBurger.nombre}
+            </h3>
+
+            <form className="mt-4 flex flex-col gap-3" onSubmit={handleEditSubmit}>
+              <label className="flex flex-col gap-1 text-xs font-bold uppercase text-dorado">
+                Nombre
+                <input
+                  className="border-2 border-vino-oscuro bg-blanco px-3 py-2 text-vino-oscuro outline-none focus:border-dorado"
+                  type="text"
+                  value={editForm.nombre}
+                  onChange={(event) => updateEditField('nombre', event.target.value)}
+                  required
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-bold uppercase text-dorado">
+                Restaurante
+                <input
+                  className="border-2 border-vino-oscuro bg-blanco px-3 py-2 text-vino-oscuro outline-none focus:border-dorado"
+                  type="text"
+                  value={editForm.restaurante}
+                  onChange={(event) => updateEditField('restaurante', event.target.value)}
+                  required
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-bold uppercase text-dorado">
+                Descripcion
+                <textarea
+                  className="min-h-[7rem] border-2 border-vino-oscuro bg-blanco px-3 py-2 text-vino-oscuro outline-none focus:border-dorado"
+                  value={editForm.descripcion}
+                  onChange={(event) => updateEditField('descripcion', event.target.value)}
+                />
+              </label>
+
+              {editError ? (
+                <p className="border border-dorado bg-vino-oscuro px-4 py-3 text-sm font-semibold text-crema">
+                  {editError}
+                </p>
+              ) : null}
+
+              <div className="mt-2 flex justify-end gap-3">
+                <button
+                  className="border border-vino-oscuro bg-crema px-4 py-2 text-xs font-bold uppercase text-vino-oscuro"
+                  type="button"
+                  onClick={closeEdit}
+                  disabled={editSaving}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="border-2 border-vino-oscuro bg-dorado px-4 py-2 font-display text-lg font-extrabold uppercase text-vino-oscuro shadow-hard-sm disabled:opacity-60"
+                  type="submit"
+                  disabled={editSaving}
+                >
+                  {editSaving ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       ) : null}
     </section>
