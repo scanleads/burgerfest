@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Confirmacion from './components/Confirmacion.jsx';
 import Loading from './components/Loading.jsx';
+import MenuCompleto from './components/MenuCompleto.jsx';
 import PantallaCerrada from './components/PantallaCerrada.jsx';
 import RegistroForm from './components/RegistroForm.jsx';
 import RevisionVoto from './components/RevisionVoto.jsx';
@@ -57,6 +58,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [editingFromRevision, setEditingFromRevision] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const activeCategory = categoryFromStatus(status);
 
@@ -89,7 +91,7 @@ export default function App() {
 
       const { data: burgers, error: burgerError } = await supabase
         .from('hamburguesas')
-        .select('id, nombre, restaurante, categoria, foto_url, orden, activa')
+        .select('id, nombre, restaurante, categoria, foto_url, descripcion, orden, activa')
         .eq('activa', true)
         .order('orden', { ascending: true });
 
@@ -324,7 +326,18 @@ export default function App() {
   }
 
   if (status === 'registro') {
-    return <RegistroForm onSubmit={handleRegister} busy={busy} error={error} />;
+    if (showMenu) {
+      return <MenuCompleto hamburguesas={hamburguesas} onVolver={() => setShowMenu(false)} />;
+    }
+
+    return (
+      <RegistroForm
+        onSubmit={handleRegister}
+        busy={busy}
+        error={error}
+        onVerMenu={() => setShowMenu(true)}
+      />
+    );
   }
 
   if (status === 'confirmacion') {

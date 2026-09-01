@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const tastedOptions = ['1-2', '3-4', '5+'];
 
@@ -6,7 +6,7 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-export default function RegistroForm({ onSubmit, busy, error }) {
+export default function RegistroForm({ onSubmit, busy, error, onVerMenu }) {
   const [form, setForm] = useState({
     nombre: '',
     apellido: '',
@@ -16,6 +16,14 @@ export default function RegistroForm({ onSubmit, busy, error }) {
     acepta_marketing: false,
   });
   const [localError, setLocalError] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
+  const formRef = useRef(null);
+
+  useEffect(() => {
+    if (formOpen) {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [formOpen]);
 
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -49,19 +57,41 @@ export default function RegistroForm({ onSubmit, busy, error }) {
   return (
     <main className="min-h-screen px-4 py-6">
       <section className="mx-auto w-full max-w-md">
-        <header className="mb-7">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-dorado">
-            Maracaibo 2026
+        <header className="mb-7 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-dorado sm:text-sm">
+            El festival de hamburguesas · Maracaibo 2026
           </p>
-          <h1 className="mt-2 font-display text-5xl font-extrabold uppercase leading-none text-white">
-            Vota tu burger favorita
+          <h1 className="mt-3 bg-gradient-to-b from-dorado via-dorado to-crema bg-clip-text font-display text-7xl font-extrabold uppercase leading-none text-transparent sm:text-8xl">
+            Burger Fest
           </h1>
-          <p className="mt-3 text-sm leading-6 text-texto-suave">
-            Registrate una vez y elige una hamburguesa en cada categoria.
+          <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-texto-suave">
+            Registrate una vez y elige tu hamburguesa favorita en cada categoria.
           </p>
+          <button
+            type="button"
+            onClick={onVerMenu}
+            className="tap-highlight-none mt-6 w-full border-2 border-vino-oscuro bg-dorado px-4 py-3 font-display text-xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm"
+          >
+            Ver menú completo
+          </button>
+
+          {!formOpen && (
+            <button
+              type="button"
+              onClick={() => setFormOpen(true)}
+              className="tap-highlight-none mt-3 w-full border-2 border-vino-oscuro bg-crema px-4 py-4 font-display text-2xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm"
+            >
+              Registrarme y votar
+            </button>
+          )}
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-4 border-2 border-vino bg-vino-oscuro p-4 shadow-hard">
+        {formOpen && (
+        <form
+          ref={formRef}
+          onSubmit={handleSubmit}
+          className="space-y-4 border-2 border-vino bg-vino-oscuro p-4 shadow-hard"
+        >
           <label className="block">
             <span className="text-sm font-semibold text-crema">Nombre</span>
             <input
@@ -163,6 +193,7 @@ export default function RegistroForm({ onSubmit, busy, error }) {
             {busy ? 'Guardando...' : 'Continuar a votar'}
           </button>
         </form>
+        )}
       </section>
     </main>
   );
