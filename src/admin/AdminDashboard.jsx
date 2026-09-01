@@ -6,6 +6,10 @@ import GestionBurgers from './GestionBurgers.jsx';
 import Metricas from './Metricas.jsx';
 import RankingVivo from './RankingVivo.jsx';
 
+// Oculto a pedido del cliente: no debe poder descargar leads crudos desde el panel.
+// Los leads los entrega Samuel al final, procesados. Reactivar poniendo esto en true.
+const MOSTRAR_EXPORT_LEADS = false;
+
 export default function AdminDashboard({ session }) {
   const [signOutError, setSignOutError] = useState('');
   const email = session?.user?.email || 'admin';
@@ -52,7 +56,7 @@ export default function AdminDashboard({ session }) {
           <aside className="space-y-6">
             <ControlEvento />
             <Metricas />
-            <ExportarLeads />
+            {MOSTRAR_EXPORT_LEADS ? <ExportarLeads /> : null}
           </aside>
         </div>
       </div>
