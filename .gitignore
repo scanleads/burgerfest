@@ -4,3 +4,4 @@ dist
 .npm-cache
 CREDENCIALES-SUPABASE.md
 .claude/
+*.sql

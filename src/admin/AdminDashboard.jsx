@@ -5,6 +5,7 @@ import ExportarLeads from './ExportarLeads.jsx';
 import GestionBurgers from './GestionBurgers.jsx';
 import Metricas from './Metricas.jsx';
 import RankingVivo from './RankingVivo.jsx';
+import ResetDatos from './ResetDatos.jsx';
 
 // Oculto a pedido del cliente: no debe poder descargar leads crudos desde el panel.
 // Los leads los entrega Samuel al final, procesados. Reactivar poniendo esto en true.
@@ -12,6 +13,7 @@ const MOSTRAR_EXPORT_LEADS = false;
 
 export default function AdminDashboard({ session }) {
   const [signOutError, setSignOutError] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
   const email = session?.user?.email || 'admin';
 
   async function handleSignOut() {
@@ -50,14 +52,18 @@ export default function AdminDashboard({ session }) {
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.55fr)]">
           <section className="space-y-6">
-            <RankingVivo />
+            <RankingVivo key={`ranking-${refreshKey}`} />
             <GestionBurgers />
           </section>
           <aside className="space-y-6">
             <ControlEvento />
-            <Metricas />
+            <Metricas key={`metricas-${refreshKey}`} />
             {MOSTRAR_EXPORT_LEADS ? <ExportarLeads /> : null}
           </aside>
+        </div>
+
+        <div className="mt-6">
+          <ResetDatos onResetDone={() => setRefreshKey((current) => current + 1)} />
         </div>
       </div>
     </main>

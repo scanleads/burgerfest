@@ -20,8 +20,8 @@ const CATEGORIES = [
     label: 'Mejor hamburguesa de $10',
     precio: '$10',
     accentBorder: 'border-t-vino',
-    accentBg: 'bg-vino',
-    accentText: 'text-crema',
+    accentBg: 'bg-dorado',
+    accentText: 'text-vino-oscuro',
     barColor: 'bg-vino',
     numberBg: 'bg-vino',
     numberText: 'text-crema',
@@ -137,14 +137,14 @@ function ColumnaCategoria({ categoria, filas }) {
       </div>
 
       {total === 0 ? (
-        <div className="mt-8 flex flex-col items-center gap-3 border-2 border-dashed border-dorado/60 px-4 py-10 text-center sm:py-14">
-          <span className="text-4xl sm:text-5xl" aria-hidden="true">
+        <div className="mt-8 flex flex-col items-center gap-4 bg-vino-oscuro/40 px-4 py-12 text-center sm:py-20">
+          <span className="text-5xl sm:text-6xl" aria-hidden="true">
             🍔
           </span>
-          <p className="font-display text-xl font-extrabold uppercase text-crema sm:text-2xl">
+          <p className="font-display text-3xl font-extrabold uppercase leading-none text-dorado sm:text-5xl">
             Aun no hay votos registrados
           </p>
-          <p className="text-sm font-semibold text-texto-suave sm:text-base">
+          <p className="text-xs font-semibold uppercase tracking-wide text-texto-suave/70 sm:text-sm">
             El ranking de esta categoria aparecera apenas lleguen los primeros votos.
           </p>
         </div>
