@@ -136,49 +136,59 @@ function ColumnaCategoria({ categoria, filas }) {
         </p>
       </div>
 
-      <div className="mt-5 space-y-3 sm:space-y-4">
-        {top.length === 0 ? (
-          <p className="border border-vino-oscuro bg-vino-oscuro px-4 py-3 text-sm font-semibold text-crema">
-            Aun no hay votos en esta categoria.
+      {total === 0 ? (
+        <div className="mt-8 flex flex-col items-center gap-3 border-2 border-dashed border-dorado/60 px-4 py-10 text-center sm:py-14">
+          <span className="text-4xl sm:text-5xl" aria-hidden="true">
+            🍔
+          </span>
+          <p className="font-display text-xl font-extrabold uppercase text-crema sm:text-2xl">
+            Aun no hay votos registrados
           </p>
-        ) : (
-          top.map((row, index) => (
-            <FilaRanking
-              categoria={categoria}
-              key={row.id}
-              maxVotes={maxVotes}
-              posicion={index + 1}
-              row={row}
-            />
-          ))
-        )}
-      </div>
+          <p className="text-sm font-semibold text-texto-suave sm:text-base">
+            El ranking de esta categoria aparecera apenas lleguen los primeros votos.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="mt-5 space-y-3 sm:space-y-4">
+            {top.map((row, index) => (
+              <FilaRanking
+                categoria={categoria}
+                key={row.id}
+                maxVotes={maxVotes}
+                posicion={index + 1}
+                row={row}
+              />
+            ))}
+          </div>
 
-      {resto.length > 0 ? (
-        <div className="mt-4">
-          <button
-            className="w-full border-2 border-vino-oscuro bg-vino-fondo px-4 py-3 font-display text-lg font-extrabold uppercase text-crema transition hover:-translate-y-0.5"
-            onClick={() => setVerTodas((prev) => !prev)}
-            type="button"
-          >
-            {verTodas ? 'Ocultar el resto de posiciones' : `Ver todas las posiciones (${resto.length} mas)`}
-          </button>
+          {resto.length > 0 ? (
+            <div className="mt-4">
+              <button
+                className="w-full border-2 border-vino-oscuro bg-vino-fondo px-4 py-3 font-display text-lg font-extrabold uppercase text-crema transition hover:-translate-y-0.5"
+                onClick={() => setVerTodas((prev) => !prev)}
+                type="button"
+              >
+                {verTodas ? 'Ocultar el resto de posiciones' : `Ver todas las posiciones (${resto.length} mas)`}
+              </button>
 
-          {verTodas ? (
-            <div className="mt-3 space-y-3 sm:space-y-4">
-              {resto.map((row, index) => (
-                <FilaRanking
-                  categoria={categoria}
-                  key={row.id}
-                  maxVotes={maxVotes}
-                  posicion={index + TOP_VISIBLE + 1}
-                  row={row}
-                />
-              ))}
+              {verTodas ? (
+                <div className="mt-3 space-y-3 sm:space-y-4">
+                  {resto.map((row, index) => (
+                    <FilaRanking
+                      categoria={categoria}
+                      key={row.id}
+                      maxVotes={maxVotes}
+                      posicion={index + TOP_VISIBLE + 1}
+                      row={row}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
           ) : null}
-        </div>
-      ) : null}
+        </>
+      )}
     </section>
   );
 }
