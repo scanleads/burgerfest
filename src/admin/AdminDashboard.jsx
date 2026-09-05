@@ -7,9 +7,8 @@ import Metricas from './Metricas.jsx';
 import RankingVivo from './RankingVivo.jsx';
 import ResetDatos from './ResetDatos.jsx';
 
-// Oculto a pedido del cliente: no debe poder descargar leads crudos desde el panel.
-// Los leads los entrega Samuel al final, procesados. Reactivar poniendo esto en true.
-const MOSTRAR_EXPORT_LEADS = false;
+// Ahora lo opera Samuel y su socio (dueños de la data), no el cliente.
+const MOSTRAR_EXPORT_LEADS = true;
 
 export default function AdminDashboard({ session }) {
   const [signOutError, setSignOutError] = useState('');

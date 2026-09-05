@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase.js';
 
-const COLUMNS = [
+const LEAD_COLUMNS = [
   'nombre',
   'apellido',
   'correo',
@@ -10,6 +10,14 @@ const COLUMNS = [
   'acepta_marketing',
   'ciudad',
   'registrado_en',
+];
+
+const CSV_COLUMNS = [
+  ...LEAD_COLUMNS,
+  'voto_8_hamburguesa',
+  'voto_8_local',
+  'voto_10_hamburguesa',
+  'voto_10_local',
 ];
 
 function escapeCsv(value) {
@@ -36,10 +44,16 @@ export default function ExportarLeads() {
     setError('');
     setMessage('');
 
-    const { data, error: leadsError } = await supabase
-      .from('participantes')
-      .select(COLUMNS.join(', '))
-      .order('registrado_en', { ascending: true });
+    const [leadsResult, votosResult, hamburguesasResult] = await Promise.all([
+      supabase
+        .from('participantes')
+        .select(['id', ...LEAD_COLUMNS].join(', '))
+        .order('registrado_en', { ascending: true }),
+      supabase.from('votos').select('participante_id, hamburguesa_id, categoria'),
+      supabase.from('hamburguesas').select('id, nombre, restaurante'),
+    ]);
+
+    const leadsError = leadsResult.error || votosResult.error || hamburguesasResult.error;
 
     if (leadsError) {
       setError('No pudimos descargar los leads. Revisa acceso authenticated/RLS.');
@@ -47,8 +61,41 @@ export default function ExportarLeads() {
       return;
     }
 
-    const header = COLUMNS.join(',');
-    const rows = (data || []).map((row) => COLUMNS.map((column) => escapeCsv(row[column])).join(','));
+    const leads = leadsResult.data || [];
+    const votos = votosResult.data || [];
+    const hamburguesasPorId = new Map((hamburguesasResult.data || []).map((h) => [h.id, h]));
+
+    const votosPorParticipante = new Map();
+    for (const voto of votos) {
+      if (!votosPorParticipante.has(voto.participante_id)) {
+        votosPorParticipante.set(voto.participante_id, {});
+      }
+      votosPorParticipante.get(voto.participante_id)[voto.categoria] = voto.hamburguesa_id;
+    }
+
+    function votoColumnas(participanteId, categoria) {
+      const hamburguesaId = votosPorParticipante.get(participanteId)?.[categoria];
+      const hamburguesa = hamburguesaId ? hamburguesasPorId.get(hamburguesaId) : null;
+      return {
+        hamburguesa: hamburguesa?.nombre ?? '',
+        local: hamburguesa?.restaurante ?? '',
+      };
+    }
+
+    const filas = leads.map((lead) => {
+      const voto8 = votoColumnas(lead.id, '8_dolares');
+      const voto10 = votoColumnas(lead.id, '10_dolares');
+      return {
+        ...lead,
+        voto_8_hamburguesa: voto8.hamburguesa,
+        voto_8_local: voto8.local,
+        voto_10_hamburguesa: voto10.hamburguesa,
+        voto_10_local: voto10.local,
+      };
+    });
+
+    const header = CSV_COLUMNS.join(',');
+    const rows = filas.map((row) => CSV_COLUMNS.map((column) => escapeCsv(row[column])).join(','));
     const csv = `\uFEFF${[header, ...rows].join('\r\n')}`;
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -62,7 +109,7 @@ export default function ExportarLeads() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    setMessage(`CSV generado con ${(data || []).length} leads.`);
+    setMessage(`CSV generado con ${leads.length} leads.`);
     setBusy(false);
   }
 
