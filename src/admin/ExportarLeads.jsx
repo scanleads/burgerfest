@@ -20,6 +20,32 @@ const CSV_COLUMNS = [
   'voto_10_local',
 ];
 
+const PAGE_SIZE = 1000;
+
+async function fetchAllRows(buildQuery) {
+  const rows = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await buildQuery().range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      return { data: null, error };
+    }
+
+    const page = data || [];
+    rows.push(...page);
+
+    if (page.length < PAGE_SIZE) {
+      break;
+    }
+
+    from += PAGE_SIZE;
+  }
+
+  return { data: rows, error: null };
+}
+
 function escapeCsv(value) {
   if (value === null || value === undefined) {
     return '';
@@ -45,12 +71,22 @@ export default function ExportarLeads() {
     setMessage('');
 
     const [leadsResult, votosResult, hamburguesasResult] = await Promise.all([
-      supabase
-        .from('participantes')
-        .select(['id', ...LEAD_COLUMNS].join(', '))
-        .order('registrado_en', { ascending: true }),
-      supabase.from('votos').select('participante_id, hamburguesa_id, categoria'),
-      supabase.from('hamburguesas').select('id, nombre, restaurante'),
+      fetchAllRows(() =>
+        supabase
+          .from('participantes')
+          .select(['id', ...LEAD_COLUMNS].join(', '))
+          .order('registrado_en', { ascending: true })
+          .order('id', { ascending: true })
+      ),
+      fetchAllRows(() =>
+        supabase
+          .from('votos')
+          .select('id, participante_id, hamburguesa_id, categoria')
+          .order('id', { ascending: true })
+      ),
+      fetchAllRows(() =>
+        supabase.from('hamburguesas').select('id, nombre, restaurante').order('id', { ascending: true })
+      ),
     ]);
 
     const leadsError = leadsResult.error || votosResult.error || hamburguesasResult.error;
