@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase.js';
 
 // Umbrales (editar aqui). Una fila se resalta en rojo cuando llega al umbral.
-const RAFAGA_VOTOS = 5; // votos al mismo local en el mismo minuto
+const RAFAGA_MOSTRAR = 5; // se muestra desde N votos al mismo local en el mismo minuto
+const RAFAGA_ALERTA = 10; // rojo desde N votos en el minuto
 const DOMINIO_ALERTA = 3; // registros con el mismo dominio no comun
-const HORA_ALERTA = 30; // votos al mismo local en una hora
-const DISPOSITIVO_REGISTROS = 2; // se alerta cuando un device_id tiene MAS de este numero
 const HORA_TOP = 10; // filas mostradas en concentracion por hora
+const HORA_PCT_ALERTA = 40; // rojo si el local tiene >= este % de los votos de esa hora...
+const HORA_MIN_VOTOS = 20; // ...Y al menos estos votos
+const DISPOSITIVO_MOSTRAR = 2; // se muestra un device_id con MAS de N registros
+const DISPOSITIVO_ALERTA = 10; // rojo desde N registros
+const DEVICE_CHARS = 12; // caracteres del device_id que se muestran
 const MAX_FILAS = 30; // filas mostradas en las demas senales
 
 const DOMINIOS_COMUNES = [
@@ -161,7 +165,10 @@ export default function AlertasFraude() {
 
     const [votosResult, hamburguesasResult, dominiosResult, dispositivosResult] = await Promise.all([
       fetchAllRows(() =>
-        supabase.from('votos').select('id, hamburguesa_id, votado_en').order('id', { ascending: true })
+        supabase
+          .from('votos')
+          .select('id, participante_id, hamburguesa_id, votado_en')
+          .order('id', { ascending: true })
       ),
       fetchAllRows(() =>
         supabase.from('hamburguesas').select('id, restaurante').order('id', { ascending: true })
@@ -193,24 +200,24 @@ export default function AlertasFraude() {
     }
 
     const restaurantePorId = new Map(hamburguesasResult.data.map((h) => [h.id, h.restaurante]));
-    const votos = votosResult.data
-      .filter((voto) => voto.votado_en)
-      .map((voto) => ({
-        restaurante: restaurantePorId.get(voto.hamburguesa_id) || 'Sin local',
-        votado_en: voto.votado_en,
-      }));
+    const votosTodos = votosResult.data.map((voto) => ({
+      participante_id: voto.participante_id,
+      restaurante: restaurantePorId.get(voto.hamburguesa_id) || 'Sin local',
+      votado_en: voto.votado_en,
+    }));
+    const votos = votosTodos.filter((voto) => voto.votado_en);
 
     const rafagas = [...contar(votos, (v) => `${v.restaurante}|${minutoKey(v.votado_en)}`)]
       .map(([key, total]) => {
         const [restaurante, minuto] = key.split('|');
         return { key, restaurante, minuto, total };
       })
-      .filter((row) => row.total >= RAFAGA_VOTOS)
+      .filter((row) => row.total >= RAFAGA_MOSTRAR)
       .sort((a, b) => b.total - a.total)
       .slice(0, MAX_FILAS)
       .map((row) => ({
         key: row.key,
-        alerta: true,
+        alerta: row.total >= RAFAGA_ALERTA,
         celdas: [row.restaurante, mostrarKey(row.minuto), row.total],
       }));
 
@@ -225,27 +232,46 @@ export default function AlertasFraude() {
         celdas: [dominio, total],
       }));
 
+    const totalPorHora = contar(votos, (v) => horaKey(v.votado_en));
     const horas = [...contar(votos, (v) => `${v.restaurante}|${horaKey(v.votado_en)}`)]
       .map(([key, total]) => {
         const [restaurante, hora] = key.split('|');
-        return { key, restaurante, hora, total };
+        const pct = (total / totalPorHora.get(hora)) * 100;
+        return { key, restaurante, hora, total, pct };
       })
       .sort((a, b) => b.total - a.total)
       .slice(0, HORA_TOP)
       .map((row) => ({
         key: row.key,
-        alerta: row.total >= HORA_ALERTA,
-        celdas: [row.restaurante, mostrarKey(row.hora), row.total],
+        alerta: row.pct >= HORA_PCT_ALERTA && row.total >= HORA_MIN_VOTOS,
+        celdas: [row.restaurante, mostrarKey(row.hora), row.total, `${Math.round(row.pct)}%`],
       }));
 
+    // Cruce device_id -> participantes -> votos -> restaurante
+    const deviceDeParticipante = new Map(dispositivosResult.data.map((p) => [p.id, p.device_id]));
+    const votosPorDispositivo = new Map();
+    for (const voto of votosTodos) {
+      const deviceId = deviceDeParticipante.get(voto.participante_id);
+      if (!deviceId) continue;
+      if (!votosPorDispositivo.has(deviceId)) votosPorDispositivo.set(deviceId, []);
+      votosPorDispositivo.get(deviceId).push(voto.restaurante);
+    }
+
+    function localMasVotado(deviceId) {
+      const restaurantes = votosPorDispositivo.get(deviceId) || [];
+      if (restaurantes.length === 0) return '-';
+      const [local, total] = [...contar(restaurantes, (r) => r)].sort((a, b) => b[1] - a[1])[0];
+      return `${local} (${Math.round((total / restaurantes.length) * 100)}%)`;
+    }
+
     const dispositivos = [...contar(dispositivosResult.data, (p) => p.device_id)]
-      .filter(([, total]) => total > DISPOSITIVO_REGISTROS)
+      .filter(([, total]) => total > DISPOSITIVO_MOSTRAR)
       .sort((a, b) => b[1] - a[1])
       .slice(0, MAX_FILAS)
       .map(([deviceId, total]) => ({
         key: deviceId,
-        alerta: true,
-        celdas: [`${deviceId.slice(0, 8)}…`, total],
+        alerta: total >= DISPOSITIVO_ALERTA,
+        celdas: [`${deviceId.slice(0, DEVICE_CHARS)}…`, total, localMasVotado(deviceId)],
       }));
 
     setSenales({ rafagas, dominios, horas, dispositivos });
@@ -279,7 +305,7 @@ export default function AlertasFraude() {
         <div className="mt-5 space-y-5">
           <TablaSenal
             titulo="Rafagas"
-            ayuda={`${RAFAGA_VOTOS}+ votos al mismo local en el mismo minuto`}
+            ayuda={`Desde ${RAFAGA_MOSTRAR} votos al mismo local en un minuto; rojo desde ${RAFAGA_ALERTA}`}
             columnas={['Local', 'Minuto', 'Votos']}
             filas={senales.rafagas}
           />
@@ -291,14 +317,14 @@ export default function AlertasFraude() {
           />
           <TablaSenal
             titulo="Concentracion por hora"
-            ayuda={`Top ${HORA_TOP}; rojo desde ${HORA_ALERTA} votos`}
-            columnas={['Local', 'Hora', 'Votos']}
+            ayuda={`Top ${HORA_TOP}; rojo si el local tiene ${HORA_PCT_ALERTA}% o mas de los votos de la hora y ${HORA_MIN_VOTOS}+ votos`}
+            columnas={['Local', 'Hora', 'Votos', '% de la hora']}
             filas={senales.horas}
           />
           <TablaSenal
             titulo="Dispositivos repetidos"
-            ayuda={`Mas de ${DISPOSITIVO_REGISTROS} registros con el mismo dispositivo`}
-            columnas={['Dispositivo', 'Registros']}
+            ayuda={`Mas de ${DISPOSITIVO_MOSTRAR} registros con el mismo dispositivo; rojo desde ${DISPOSITIVO_ALERTA}`}
+            columnas={['Dispositivo', 'Registros', 'Local mas votado']}
             filas={senales.dispositivos}
           />
         </div>
