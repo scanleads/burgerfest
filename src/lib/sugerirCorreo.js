@@ -56,7 +56,7 @@ function distancia(a, b) {
 function corregirTerminacion(dominio) {
   return dominio
     .replace(/\.com(\.?com)+$/, '.com')
-    .replace(/\.(con|cm|om|vom|comd|co)$/, '.com');
+    .replace(/\.(con|cm|om|vom|comd|co|cpm|xom|ocm|coom|comm)$/, '.com');
 }
 
 export function sugerirCorreo(correo) {
