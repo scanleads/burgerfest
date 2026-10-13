@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import logoBurgerFest from '../assets/logo-burgerfest.png';
 import logoIkaika from '../assets/logo-ikaika.png';
+import { sugerirCorreo } from '../lib/sugerirCorreo.js';
 
 const tastedOptions = ['1-2', '3-4', '5+'];
 
@@ -18,6 +19,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, config 
     acepta_marketing: false,
   });
   const [localError, setLocalError] = useState('');
+  const [sugerenciaCorreo, setSugerenciaCorreo] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const formRef = useRef(null);
 
@@ -118,18 +120,39 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, config 
             />
           </label>
 
-          <label className="block">
-            <span className="text-sm font-semibold text-crema">Correo</span>
-            <input
-              type="email"
-              value={form.correo}
-              onChange={(event) => updateField('correo', event.target.value)}
-              className="mt-2 w-full border-2 border-vino bg-vino-fondo px-4 py-3 text-white outline-none transition focus:border-dorado"
-              autoComplete="email"
-              inputMode="email"
-              required
-            />
-          </label>
+          <div>
+            <label className="block">
+              <span className="text-sm font-semibold text-crema">Correo</span>
+              <input
+                type="email"
+                value={form.correo}
+                onChange={(event) => {
+                  updateField('correo', event.target.value);
+                  setSugerenciaCorreo(null);
+                }}
+                onBlur={() => setSugerenciaCorreo(sugerirCorreo(form.correo))}
+                className="mt-2 w-full border-2 border-vino bg-vino-fondo px-4 py-3 text-white outline-none transition focus:border-dorado"
+                autoComplete="email"
+                inputMode="email"
+                required
+              />
+            </label>
+            {sugerenciaCorreo ? (
+              <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-crema">
+                <span>¿Quisiste decir {sugerenciaCorreo}?</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateField('correo', sugerenciaCorreo);
+                    setSugerenciaCorreo(null);
+                  }}
+                  className="border-2 border-vino-oscuro bg-dorado px-3 py-1 text-xs font-extrabold uppercase text-vino-oscuro"
+                >
+                  Sí, corregir
+                </button>
+              </p>
+            ) : null}
+          </div>
 
           <label className="block">
             <span className="text-sm font-semibold text-crema">Edad</span>
