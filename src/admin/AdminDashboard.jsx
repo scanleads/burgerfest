@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase.js';
+import AlertasFraude from './AlertasFraude.jsx';
 import ControlEvento from './ControlEvento.jsx';
 import ExportarLeads from './ExportarLeads.jsx';
 import GestionBurgers from './GestionBurgers.jsx';
@@ -57,6 +58,7 @@ export default function AdminDashboard({ session }) {
           <aside className="space-y-6">
             <ControlEvento />
             <Metricas key={`metricas-${refreshKey}`} />
+            <AlertasFraude key={`alertas-${refreshKey}`} />
             {MOSTRAR_EXPORT_LEADS ? <ExportarLeads /> : null}
           </aside>
         </div>
