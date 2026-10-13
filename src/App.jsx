@@ -18,6 +18,10 @@ function friendlySupabaseError(error) {
     return 'Ocurrio un error inesperado. Intenta de nuevo.';
   }
 
+  if (String(error.message || '').includes('dominio_bloqueado')) {
+    return 'Usa tu correo personal para votar.';
+  }
+
   return 'No pudimos conectar con la base de datos. Revisa tu senal e intenta otra vez.';
 }
 
