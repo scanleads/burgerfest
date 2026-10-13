@@ -9,7 +9,8 @@ const HORA_TOP = 10; // filas mostradas en concentracion por hora
 const HORA_PCT_ALERTA = 40; // rojo si el local tiene >= este % de los votos de esa hora...
 const HORA_MIN_VOTOS = 20; // ...Y al menos estos votos
 const DISPOSITIVO_MOSTRAR = 2; // se muestra un device_id con MAS de N registros
-const DISPOSITIVO_ALERTA = 10; // rojo desde N registros
+const DISPOSITIVO_ALERTA = 10; // rojo desde N registros...
+const DISPOSITIVO_PCT_ALERTA = 50; // ...Y si el local mas votado tiene >= este % de sus votos
 const DEVICE_CHARS = 12; // caracteres del device_id que se muestran
 const MAX_FILAS = 30; // filas mostradas en las demas senales
 
@@ -259,20 +260,24 @@ export default function AlertasFraude() {
 
     function localMasVotado(deviceId) {
       const restaurantes = votosPorDispositivo.get(deviceId) || [];
-      if (restaurantes.length === 0) return '-';
+      if (restaurantes.length === 0) return { texto: '-', pct: 0 };
       const [local, total] = [...contar(restaurantes, (r) => r)].sort((a, b) => b[1] - a[1])[0];
-      return `${local} (${Math.round((total / restaurantes.length) * 100)}%)`;
+      const pct = (total / restaurantes.length) * 100;
+      return { texto: `${local} (${Math.round(pct)}%)`, pct };
     }
 
     const dispositivos = [...contar(dispositivosResult.data, (p) => p.device_id)]
       .filter(([, total]) => total > DISPOSITIVO_MOSTRAR)
       .sort((a, b) => b[1] - a[1])
       .slice(0, MAX_FILAS)
-      .map(([deviceId, total]) => ({
-        key: deviceId,
-        alerta: total >= DISPOSITIVO_ALERTA,
-        celdas: [`${deviceId.slice(0, DEVICE_CHARS)}…`, total, localMasVotado(deviceId)],
-      }));
+      .map(([deviceId, total]) => {
+        const top = localMasVotado(deviceId);
+        return {
+          key: deviceId,
+          alerta: total >= DISPOSITIVO_ALERTA && top.pct >= DISPOSITIVO_PCT_ALERTA,
+          celdas: [`${deviceId.slice(0, DEVICE_CHARS)}…`, total, top.texto],
+        };
+      });
 
     setSenales({ rafagas, dominios, horas, dispositivos });
     setLastRun(lastRunFormatter.format(new Date()));
@@ -323,7 +328,7 @@ export default function AlertasFraude() {
           />
           <TablaSenal
             titulo="Dispositivos repetidos"
-            ayuda={`Mas de ${DISPOSITIVO_MOSTRAR} registros con el mismo dispositivo; rojo desde ${DISPOSITIVO_ALERTA}`}
+            ayuda={`Mas de ${DISPOSITIVO_MOSTRAR} registros con el mismo dispositivo; rojo desde ${DISPOSITIVO_ALERTA} registros y ${DISPOSITIVO_PCT_ALERTA}% o mas de sus votos al mismo local`}
             columnas={['Dispositivo', 'Registros', 'Local mas votado']}
             filas={senales.dispositivos}
           />
