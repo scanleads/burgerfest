@@ -199,8 +199,8 @@ export default function GestionBurgers() {
         </select>
         <input
           className="border-2 border-vino-oscuro bg-blanco px-3 py-2 text-vino-oscuro outline-none focus:border-dorado"
-          type="url"
-          placeholder="Foto URL"
+          type="text"
+          placeholder="/logos/nombre.webp"
           value={form.foto_url}
           onChange={(event) => updateField('foto_url', event.target.value)}
         />
