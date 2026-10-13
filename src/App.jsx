@@ -72,8 +72,8 @@ export default function App() {
 
       if (configError) {
         setConfig({
-          titulo_evento: 'Burger Fest Maracaibo 2026',
-          ciudad_activa: 'Maracaibo',
+          titulo_evento: 'Burger Fest Barquisimeto 2026',
+          ciudad_activa: 'Barquisimeto',
           mensaje_cierre:
             'No pudimos verificar si la votacion esta abierta. Intenta de nuevo en unos minutos.',
         });
@@ -137,7 +137,7 @@ export default function App() {
     setBusy(true);
     setError('');
 
-    const ciudad = config.ciudad_activa || 'Maracaibo';
+    const ciudad = config.ciudad_activa || 'Barquisimeto';
 
     const { data: participanteId, error: rpcError } = await supabase.rpc('registrar_participante', {
       p_nombre: form.nombre,
@@ -271,7 +271,7 @@ export default function App() {
         p_participante_id: participante.id,
         p_hamburguesa_id: burger.id,
         p_categoria: category,
-        p_ciudad: participante.ciudad || config.ciudad_activa || 'Maracaibo',
+        p_ciudad: participante.ciudad || config.ciudad_activa || 'Barquisimeto',
       });
 
       if (voteError) {
@@ -336,6 +336,7 @@ export default function App() {
         busy={busy}
         error={error}
         onVerMenu={() => setShowMenu(true)}
+        config={config}
       />
     );
   }
