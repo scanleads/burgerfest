@@ -5,3 +5,7 @@ dist
 CREDENCIALES-SUPABASE.md
 .claude/
 *.sql
+
+# Documentacion interna de traspaso (NO subir al repo publico)
+00_ENTREGA/
+*.zip

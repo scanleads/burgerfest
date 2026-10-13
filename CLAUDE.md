@@ -1,96 +1,49 @@
-# CLAUDE.md — BurgerFest Votación
+# CLAUDE.md — BurgerFest Votación (Scanleads)
 
-> Archivo de instrucciones del proyecto. Claude Code lo lee automáticamente al
-> abrir esta carpeta. Define el reparto de trabajo, el stack y las reglas.
+> Claude Code lee este archivo automáticamente al abrir la carpeta.
+> Documentación completa: `00_ENTREGA/00-DOCUMENTO-MAESTRO-BURGERFEST.md` (léelo si falta contexto).
+> Responsable del proyecto desde el 11-oct-2026: **Dennis** (antes Samuel).
 
----
+## Qué es
+Web app de votación de hamburguesas con captura de leads para la gira del Burger Fest
+(Maracaibo ✅ → Barquisimeto 17-18 oct 2026 → Caracas nov). El objetivo real del negocio
+es CAPTURAR LEADS; la votación es el gancho.
 
-## Qué es este proyecto
+## Stack (no cambiar sin aprobación)
+React 18 + Vite 5 (multi-page: index.html, admin.html, resultados.html) + Tailwind 3 ·
+Supabase (proyecto ref wxxoxwujhvyrzdrvukpy, org "scanleads" — NO la org "kuadra") · Vercel (deploy
+automático al hacer push a main) · GitHub scanleads/burgerfest (PÚBLICO).
 
-Web app de votación gastronómica con captación de leads para el Burger Fest.
-Los asistentes escanean un QR, se registran y votan su hamburguesa favorita en
-dos categorías de precio ($8 y $10). El objetivo real es capturar leads para el
-cliente y servir de piloto para expandir a 3 ciudades (Maracaibo → Barquisimeto
-→ Caracas).
+## Forma de trabajo (obligatoria)
+1. Antes de escribir código: plan corto (archivos a tocar y en qué orden) y ESPERAR el OK del responsable.
+2. Cambios de UI: probar en local (`npm run dev`; en local las rutas son /admin.html y /resultados.html).
+3. Lo esencial que ya funciona (registro → voto → admin → resultados) debe seguir funcionando.
+4. `npm run build` debe compilar antes de cualquier commit.
+5. **Commits SIN líneas "Co-Authored-By" ni firma de Claude** (Vercel Hobby bloquea el deploy).
+6. Antes de un push: `git status` y confirmar que no se sube `.env`, credenciales ni `*.sql`.
+7. Nada se da por terminado sin que el responsable lo valide.
+8. Codex es opcional: si se usa, siempre en hilo nuevo (nunca "resume"); si se cuelga, Claude lo hace directo.
 
-Primer evento: Maracaibo, 4-5-6 de septiembre 2026.
+## Reglas de negocio
+1. Vota en AMBAS categorías: 1 voto en $8 + 1 voto en $10.
+2. Registro antes de votar: nombre, apellido, correo obligatorios; edad y "cuántas probaste" opcionales.
+3. El consentimiento de marketing es opcional y NUNCA bloquea el voto.
+4. Antitrampa: correo único + device_id + unique(participante_id, categoria).
+5. /resultados es PÚBLICA a propósito (se proyecta en el evento). El público no ve leads.
+6. Formulario simple: no añadir fricción. Las medidas antifraude deben ser invisibles para el usuario normal.
 
----
+## Seguridad (crítico)
+- El frontend usa SOLO la anon key. service_role NUNCA en el frontend ni con prefijo VITE_.
+- El público escribe solo vía RPC: registrar_participante, mis_categorias_votadas, registrar_voto.
+- Permisos de admin atados al UID abd2dc50-0005-4855-9575-a06d4b850778 (usuario burguerfest@gmail.com).
+  Nunca dar permisos a "cualquier authenticated".
+- Consultas que puedan crecer: paginar con .range() (Supabase devuelve como máximo 1000 filas).
+- Cambios de base de datos: redactar el SQL para que el responsable lo corra él mismo en el SQL Editor.
+  El archivo BURGERFEST-SQL-DEFINITIVO.sql está desactualizado; la verdad es la base viva.
 
-## Stack técnico (NO cambiar sin aprobación)
-
-- Frontend: React + Vite + Tailwind CSS
-- Backend/DB: Supabase (PostgreSQL)
-- Hosting: Vercel
-- Control de versiones: GitHub
-- PWA opcional (no crítico para el MVP)
-
-Todo debe correr en tiers gratuitos.
-
----
-
-## Reparto con Codex
-
-- Planificar y decidir: Claude. Antes de escribir codigo, plan corto y aprobacion de Samuel.
-- Escribir codigo de mas de un archivo: delegar a Codex con /codex:rescue,
-  con el plan ya aprobado adentro del pedido.
-- Revisar: lo hace el que no escribio. Si el codigo salio de Codex, lo reviso yo (Claude).
-  Si lo escribi yo, corre /codex:adversarial-review.
-- Nada se da por terminado sin que Samuel lea el cambio.
-- Si Codex y Claude no coinciden, gana el que muestre el error reproducido,
-  no el que argumente mejor.
-- Para tareas simples usar /codex:rescue --model gpt-5.4-mini (ahorra abono).
-  Reservar el modelo grande solo para logica compleja.
-
----
-
-## Reglas de negocio (críticas — no improvisar)
-
-1. Votante vota en AMBAS categorias: 1 voto en $8 + 1 voto en $10.
-2. Registro obligatorio ANTES de votar: nombre, apellido, correo.
-   Edad es opcional. "Cuantas hamburguesas probaste" (1-2 / 3-4 / 5+) es opcional.
-3. Casilla de consentimiento de marketing: opcional, NO bloquea el voto.
-4. Antitrampa: 1 voto por categoria por persona. Control por correo unico + device_id.
-5. Resultados de votacion: SOLO el admin los ve. El publico NO ve el ranking.
-6. Flujo: registro corto primero -> luego las dos votaciones -> confirmacion.
-
----
-
-## Estructura de la base de datos
-
-4 tablas: hamburguesas, participantes, votos, config.
-1 vista: ranking_hamburguesas (para el admin).
-El SQL completo esta en el archivo BURGERFEST-SQL-DEFINITIVO.sql.
-Los grants explicitos ya estan incluidos (requeridos en proyectos Supabase
-creados despues del 30-May-2026).
-
----
-
-## Identidad visual
-
-- Estetica: festival gastronomico, apetitosa, energica.
-- Colores: definir con la marca del Burger Fest (pendiente recibir del cliente).
-  Por defecto: tonos calidos (rojo/naranja/amarillo mostaza) sobre fondo oscuro.
-- Tabs superiores para separar categoria $8 y $10 (evita scroll largo).
-- Cards con foto de la hamburguesa, nombre, restaurante y boton seleccionar.
-- Feedback visual claro al seleccionar (borde resaltado) antes de confirmar.
-- Mobile-first: la mayoria vota desde el telefono con posible mala senal.
-
----
-
-## Prioridades de ingenieria
-
-1. Velocidad de carga (gente con mala senal en el festival).
-2. Que aguante votacion concurrente (cuando el animador impulsa desde tarima).
-3. Cero perdida de votos ni de leads.
-4. Panel admin claro para operar en vivo.
-
----
-
-## Lo que NO se hace
-
-- No usar Google Sheets ni Apps Script (se decidio Supabase).
-- No mostrar resultados al publico.
-- No pedir datos que el cliente no pidio.
-- No bloquear el voto por no aceptar marketing.
-- No dar nada por terminado sin que Samuel lo valide.
+## Datos de referencia
+- Ciudad y título del evento: tabla config (ciudad_activa, titulo_evento, estado, mensaje_cierre).
+- Categorías internas: '8_dolares' y '10_dolares'.
+- Logos de locales: Supabase Storage, bucket público "logos".
+- Paleta: #7a1f2e vino (fondo), #5c1622, #9e2a3c, #f2c065 dorado, #f8e8db crema.
+- Flags: MOSTRAR_EXPORT_LEADS=true (AdminDashboard), REQUERIR_CLAVE=false y TOP_VISIBLE=5 (resultados).
