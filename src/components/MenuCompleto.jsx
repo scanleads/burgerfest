@@ -9,6 +9,59 @@ function descripcionVisible(descripcion) {
   return descripcion || 'Menú por confirmar';
 }
 
+function FichaBurger({ burger, isOpen, onToggle }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const hasImage = Boolean(burger.foto_url) && !imageFailed;
+  const description = descripcionVisible(burger.descripcion);
+  const isPending = description === 'Menú por confirmar';
+
+  return (
+    <div className="border-2 border-vino bg-vino-fondo">
+      <div className="aspect-[4/5] w-full bg-gradient-to-br from-vino/40 via-vino/25 to-dorado/30">
+        {hasImage ? (
+          <img
+            src={burger.foto_url}
+            alt={`${burger.nombre} de ${burger.restaurante}`}
+            width="640"
+            height="800"
+            loading="lazy"
+            decoding="async"
+            onError={() => setImageFailed(true)}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center px-3 text-center">
+            <span className="break-words font-display text-2xl font-extrabold uppercase leading-none text-white drop-shadow">
+              {burger.nombre}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="p-2 sm:p-3">
+        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-dorado">
+          {categoryLabels[burger.categoria] || burger.categoria}
+        </p>
+        <h3 className="mt-1 break-words font-display text-xl font-extrabold uppercase leading-tight text-white sm:text-2xl">
+          {burger.nombre}
+        </h3>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={isOpen}
+          className="tap-highlight-none mt-2 w-full border-2 border-dorado bg-transparent px-2 py-2 text-xs font-extrabold uppercase text-dorado transition hover:translate-x-[2px] hover:translate-y-[2px] sm:text-sm"
+        >
+          Ingredientes
+        </button>
+        {isOpen && (
+          <p className={`mt-3 text-sm leading-6 ${isPending ? 'italic text-texto-suave' : 'text-crema'}`}>
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function MenuCompleto({ hamburguesas, onVolver, votacionAbierta = true }) {
   const [openById, setOpenById] = useState({});
 
@@ -60,77 +113,27 @@ export default function MenuCompleto({ hamburguesas, onVolver, votacionAbierta =
           </p>
         </header>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {restaurantes.map(({ restaurante, burgers }) => {
-            const logo = burgers.find((burger) => burger.foto_url)?.foto_url;
-
-            return (
-              <article
-                key={restaurante}
-                className="overflow-hidden border-2 border-vino/50 bg-vino-oscuro"
-              >
-                <div className="aspect-[4/3] w-full bg-gradient-to-br from-vino/40 via-vino/25 to-dorado/30">
-                  {logo ? (
-                    <img
-                      src={logo}
-                      alt={restaurante}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center px-5 text-center">
-                      <span className="font-display text-4xl font-extrabold uppercase leading-none text-white drop-shadow">
-                        {restaurante}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4 p-4">
-                  <h2 className="font-display text-3xl font-extrabold uppercase leading-none text-white">
-                    {restaurante}
-                  </h2>
-
-                  <div className="space-y-3">
-                    {burgers.map((burger) => {
-                      const isOpen = Boolean(openById[burger.id]);
-                      const description = descripcionVisible(burger.descripcion);
-                      const isPending = description === 'Menú por confirmar';
-
-                      return (
-                        <div key={burger.id} className="border-2 border-vino bg-vino-fondo p-3">
-                          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-dorado">
-                            {categoryLabels[burger.categoria] || burger.categoria}
-                          </p>
-                          <h3 className="mt-1 font-display text-2xl font-extrabold uppercase leading-none text-white">
-                            {burger.nombre}
-                          </h3>
-                          <button
-                            type="button"
-                            onClick={() => toggleBurger(burger.id)}
-                            aria-expanded={isOpen}
-                            className="tap-highlight-none mt-3 w-full border-2 border-dorado bg-transparent px-3 py-2 text-sm font-extrabold uppercase text-dorado transition hover:translate-x-[2px] hover:translate-y-[2px]"
-                          >
-                            Ingredientes
-                          </button>
-                          {isOpen && (
-                            <p
-                              className={`mt-3 text-sm leading-6 ${
-                                isPending ? 'italic text-texto-suave' : 'text-crema'
-                              }`}
-                            >
-                              {description}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+        <div className="space-y-5">
+          {restaurantes.map(({ restaurante, burgers }) => (
+            <article
+              key={restaurante}
+              className="overflow-hidden border-2 border-vino/50 bg-vino-oscuro p-3 sm:p-4"
+            >
+              <h2 className="font-display text-3xl font-extrabold uppercase leading-none text-white">
+                {restaurante}
+              </h2>
+              <div className="mt-3 grid grid-cols-2 items-start gap-3">
+                {burgers.map((burger) => (
+                  <FichaBurger
+                    key={burger.id}
+                    burger={burger}
+                    isOpen={Boolean(openById[burger.id])}
+                    onToggle={() => toggleBurger(burger.id)}
+                  />
+                ))}
+              </div>
+            </article>
+          ))}
         </div>
 
         <div className="sticky bottom-0 -mx-4 mt-5 border-t-2 border-vino-oscuro bg-vino-fondo px-4 py-3">
