@@ -47,3 +47,26 @@ automático al hacer push a main) · GitHub scanleads/burgerfest (PÚBLICO).
 - Logos de locales: Supabase Storage, bucket público "logos".
 - Paleta: #7a1f2e vino (fondo), #5c1622, #9e2a3c, #f2c065 dorado, #f8e8db crema.
 - Flags: MOSTRAR_EXPORT_LEADS=true (AdminDashboard), REQUERIR_CLAVE=false y TOP_VISIBLE=5 (resultados).
+
+## Estado actual (14-oct-2026)
+- Evento activo: Burger Fest Barquisimeto 17-18 oct 2026. La votación se abre/cierra con `config.estado`
+  (hoy cerrada hasta el evento). Después sigue Caracas en noviembre.
+- Base: RPC con validaciones, anon sin INSERT directo, tabla `dominios_bloqueados` (Sprint 2).
+- Front: logos de locales en `public/logos` (S4); Vercel Analytics en `index.html` (S5);
+  panel de anomalías en el admin, `AlertasFraude.jsx` (S6); sugerencia de correo,
+  `src/lib/sugerirCorreo.js` (S7).
+- Bienvenida con cuenta regresiva: `PantallaBienvenida.jsx` + `src/lib/faseEvento.js`
+  (`config.inicio_evento` / `fin_evento`); "VER MENÚ" disponible con la votación cerrada (S8).
+- Fotos por hamburguesa en `public/burgers/<slug>.webp`: 480x600 (4:5), WebP q72, recorte centrado,
+  sRGB; menú y votación en 2 columnas (S9, S10). Las filas con `foto_url` null muestran el nombre.
+- Paleta vigente (variables en `src/index.css`): fondo #7d1b18, negro #1a1a1a, amarillo #fbc72b,
+  beige #faf6ed.
+- Pie de la productora (IKAIKA): componente `src/components/PieProductora.jsx`, presente en todas las
+  pantallas públicas y en `AdminDashboard`. En pantallas con botón fijo abajo va antes de ese botón.
+- Las hamburguesas de Maracaibo están inactivas (`activa=false`); los cambios de contenido se aplican
+  solo a filas con `activa = true`.
+- Columnas reales de `hamburguesas`: nombre, restaurante, categoria, descripcion, foto_url, orden,
+  activa (id y creada_en con default).
+- Sprint 11 (contenido de Barquisimeto): fotos de Siria y pie de productora hechos en código; el SQL de
+  contenido se redacta en `00_ENTREGA/SPRINT11-CONTENIDO.sql` y lo corre el responsable.
+- El `.env` apunta a PRODUCCIÓN: en local no registrarse ni votar.
