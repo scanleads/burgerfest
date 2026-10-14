@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: dark;
-  --vino-fondo: 185 50 28;
+  --vino-fondo: 125 27 24;
   --vino-oscuro: 26 26 26;
   --vino: 142 38 20;
   --dorado: 251 199 43;
@@ -26,9 +26,9 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(142, 38, 20, 0.55), transparent 30rem),
-    radial-gradient(circle at bottom right, rgba(142, 38, 20, 0.55), transparent 30rem),
-    #b9321c;
+    radial-gradient(circle at top left, rgba(94, 20, 18, 0.55), transparent 30rem),
+    radial-gradient(circle at bottom right, rgba(94, 20, 18, 0.55), transparent 30rem),
+    #7d1b18;
   color: #f3e3d3;
 }
 
