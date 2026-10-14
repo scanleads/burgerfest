@@ -1,7 +1,9 @@
-import logoBurgerFest from '../assets/logo-burgerfest.png';
+import logoBurgerFestNegro from '../assets/logo-burgerfest-negro.png';
 import PieProductora from './PieProductora.jsx';
+import Ticket, { Renglon, Separador } from './Ticket.jsx';
 
-const FECHA_Y_LUGAR = '17 y 18 de octubre · Terraza Hotel Trinitaria Suites';
+const FECHA = '17 Y 18 OCT';
+const LUGAR = 'TERRAZA HOTEL TRINITARIA SUITES';
 
 function pad(numero) {
   return String(numero).padStart(2, '0');
@@ -17,17 +19,15 @@ function Cuenta({ milisegundos }) {
   ];
 
   return (
-    <div className="mt-6">
-      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
+    <div>
+      <p className="text-center text-xs font-bold uppercase tracking-[0.15em]">
         Cuenta regresiva para el 17 de octubre
       </p>
       <div className="mt-3 grid grid-cols-4 gap-2">
         {unidades.map(({ etiqueta, valor }) => (
-          <div key={etiqueta} className="border-2 border-vino bg-vino-oscuro px-1 py-3 shadow-hard">
-            <p className="font-display text-4xl font-extrabold leading-none text-white sm:text-5xl">
-              {pad(valor)}
-            </p>
-            <p className="mt-1 text-xs font-semibold uppercase text-texto-suave">{etiqueta}</p>
+          <div key={etiqueta} className="border-2 border-dashed border-[#1a1a1a]/60 px-1 py-2 text-center">
+            <p className="text-3xl font-bold leading-none sm:text-4xl">{pad(valor)}</p>
+            <p className="mt-1 text-[11px] font-bold uppercase">{etiqueta}</p>
           </div>
         ))}
       </div>
@@ -42,27 +42,43 @@ export default function PantallaBienvenida({ config, fase, falta, onVerMenu }) {
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-10">
       <section className="w-full max-w-md text-center">
-        <img
-          src={logoBurgerFest}
-          alt="Burger Fest"
-          className="mx-auto h-[163px] w-auto max-w-full sm:h-[222px]"
-        />
-        <h1 className="mt-4 font-display text-5xl font-extrabold uppercase leading-none text-white">
-          Burger Fest {ciudad} 2026
+        <h1 className="font-display text-6xl font-extrabold uppercase leading-[0.9] text-white sm:text-7xl">
+          La última mordida es tuya.
         </h1>
-        <div className="mx-auto mt-5 h-1 w-24 bg-gradient-to-r from-vino to-dorado" />
-        <p className="mt-5 text-base font-semibold text-crema">{FECHA_Y_LUGAR}</p>
 
-        {fase === 'antes' ? (
-          <Cuenta milisegundos={falta} />
-        ) : (
-          <div className="mt-6 border-2 border-vino bg-vino-oscuro px-5 py-5 shadow-hard">
-            <p className="font-display text-3xl font-extrabold uppercase leading-none text-dorado">
-              La votación abre en breve
-            </p>
-            <p className="mt-3 text-base leading-7 text-texto-suave">Actualiza la página cuando abra</p>
+        <Ticket className="mt-7 text-left">
+          <img
+            src={logoBurgerFestNegro}
+            alt="Burger Fest"
+            className="mx-auto h-28 w-auto max-w-full sm:h-36"
+          />
+          <p className="mt-3 text-center text-sm font-bold uppercase tracking-[0.15em]">
+            Edición {ciudad}
+          </p>
+          <p className="mt-1 text-center font-bold">{FECHA}</p>
+          <p className="text-center text-xs font-bold">{LUGAR}</p>
+
+          <Separador />
+
+          <div className="space-y-1.5">
+            <Renglon izq="1x JURADO OFICIAL" der="TÚ" />
+            <Renglon izq="1x VOTO" der="GRATIS" />
+            <Renglon izq="1x LA MEJOR BURGER" der="¿?" />
           </div>
-        )}
+
+          <Separador />
+
+          {fase === 'antes' ? (
+            <Cuenta milisegundos={falta} />
+          ) : (
+            <div className="text-center">
+              <p className="font-display text-3xl font-extrabold uppercase leading-none">
+                La votación abre en breve
+              </p>
+              <p className="mt-2 text-xs font-bold uppercase">Actualiza la página cuando abra</p>
+            </div>
+          )}
+        </Ticket>
 
         {onVerMenu ? (
           <button

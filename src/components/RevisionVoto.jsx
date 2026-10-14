@@ -1,4 +1,5 @@
 import PieProductora from './PieProductora.jsx';
+import Ticket, { Renglon, Separador } from './Ticket.jsx';
 
 const categoryLabels = {
   '8_dolares': '$8',
@@ -44,7 +45,9 @@ export default function RevisionVoto({
           </div>
         )}
 
-        <div className="mt-7 space-y-3">
+        <Ticket className="mt-7">
+          <p className="text-center text-xs font-bold uppercase tracking-[0.2em]">Tu voto</p>
+
           {['8_dolares', '10_dolares'].map((category) => {
             const burger = selectedBurgerFor(
               category,
@@ -55,17 +58,13 @@ export default function RevisionVoto({
             const alreadyRegistered = Boolean(votesByCategory[category]);
 
             return (
-              <div
-                key={category}
-                className="border-2 border-vino-oscuro bg-vino-oscuro p-4"
-              >
-                <p className="font-display text-2xl font-extrabold uppercase text-dorado">
-                  Categoria {categoryLabels[category]}
-                </p>
-                <p className="mt-2 text-lg font-bold text-white">
-                  {burger?.nombre || 'Seleccion pendiente'}
-                </p>
-                <p className="mt-1 text-sm text-texto-suave">
+              <div key={category}>
+                <Separador />
+                <Renglon
+                  izq={`1x VOTO ${categoryLabels[category]}`}
+                  der={burger?.nombre || 'Seleccion pendiente'}
+                />
+                <p className="mt-0.5 text-right text-xs uppercase opacity-70">
                   {burger?.restaurante || 'Vuelve a elegir una opcion'}
                 </p>
 
@@ -73,14 +72,14 @@ export default function RevisionVoto({
                   type="button"
                   disabled={busy || alreadyRegistered}
                   onClick={() => onChangeCategory(category)}
-                  className="mt-4 border-2 border-crema bg-transparent px-4 py-3 text-sm font-extrabold uppercase text-crema shadow-hard-secondary transition hover:translate-x-px hover:translate-y-px disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0"
+                  className="mt-3 border-2 border-[#1a1a1a] bg-transparent px-4 py-2 text-sm font-extrabold uppercase text-[#1a1a1a] transition hover:translate-x-px hover:translate-y-px disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0"
                 >
                   {alreadyRegistered ? 'Registrado' : 'Cambiar'}
                 </button>
               </div>
             );
           })}
-        </div>
+        </Ticket>
 
         <button
           type="button"

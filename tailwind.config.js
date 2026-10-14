@@ -6,6 +6,7 @@ export default {
       fontFamily: {
         display: ['"Barlow Condensed"', 'Inter', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['"Courier Prime"', '"Courier New"', 'monospace'],
       },
       colors: {
         'vino-fondo': 'rgb(var(--vino-fondo) / <alpha-value>)',

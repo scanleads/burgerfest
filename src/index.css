@@ -44,3 +44,29 @@ button:disabled {
 .tap-highlight-none {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Ticket de factura (Sprint 12): papel beige con bordes dentados arriba y abajo.
+   La mascara va dentro de @supports: si el navegador no la soporta, el papel queda con borde recto. */
+.ticket {
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
+}
+
+.ticket-papel {
+  background: #faf6ed;
+  color: #1a1a1a;
+}
+
+@supports ((-webkit-mask-image: none) or (mask-image: none)) {
+  .ticket-papel {
+    padding-top: 1.75rem;
+    padding-bottom: 1.75rem;
+    -webkit-mask:
+      conic-gradient(from -45deg at bottom, #000 90deg, #0000 0) top / 14px 7px repeat-x,
+      linear-gradient(#000 0 0) center / 100% calc(100% - 14px) no-repeat,
+      conic-gradient(from 135deg at top, #000 90deg, #0000 0) bottom / 14px 7px repeat-x;
+    mask:
+      conic-gradient(from -45deg at bottom, #000 90deg, #0000 0) top / 14px 7px repeat-x,
+      linear-gradient(#000 0 0) center / 100% calc(100% - 14px) no-repeat,
+      conic-gradient(from 135deg at top, #000 90deg, #0000 0) bottom / 14px 7px repeat-x;
+  }
+}
