@@ -1,3 +1,5 @@
+import PieProductora from './PieProductora.jsx';
+
 const labels = {
   '8_dolares': '$8',
   '10_dolares': '$10',
@@ -39,6 +41,8 @@ export default function Confirmacion({ votos }) {
             );
           })}
         </div>
+
+        <PieProductora />
       </section>
     </main>
   );

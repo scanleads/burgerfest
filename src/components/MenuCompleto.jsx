@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import PieProductora from './PieProductora.jsx';
 
 const categoryLabels = {
   '8_dolares': '$8',
@@ -135,6 +136,8 @@ export default function MenuCompleto({ hamburguesas, onVolver, votacionAbierta =
             </article>
           ))}
         </div>
+
+        <PieProductora />
 
         <div className="sticky bottom-0 -mx-4 mt-5 border-t-2 border-vino-oscuro bg-vino-fondo px-4 py-3">
           <button

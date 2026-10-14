@@ -1,4 +1,5 @@
 import logoBurgerFest from '../assets/logo-burgerfest.png';
+import PieProductora from './PieProductora.jsx';
 
 const FECHA_Y_LUGAR = '17 y 18 de octubre · Terraza Hotel Trinitaria Suites';
 
@@ -72,6 +73,8 @@ export default function PantallaBienvenida({ config, fase, falta, onVerMenu }) {
             VER MENÚ
           </button>
         ) : null}
+
+        <PieProductora />
       </section>
     </main>
   );

@@ -1,5 +1,6 @@
 import { faseEvento, useAhora } from '../lib/faseEvento.js';
 import PantallaBienvenida from './PantallaBienvenida.jsx';
+import PieProductora from './PieProductora.jsx';
 
 export default function PantallaCerrada({ config, fechas = null, onVerMenu }) {
   const ahora = useAhora(fechas);
@@ -38,6 +39,8 @@ export default function PantallaCerrada({ config, fechas = null, onVerMenu }) {
             VER MENÚ
           </button>
         ) : null}
+
+        <PieProductora />
       </section>
     </main>
   );

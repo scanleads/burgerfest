@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import logoBurgerFest from '../assets/logo-burgerfest.png';
-import logoIkaika from '../assets/logo-ikaika.png';
+import PieProductora from './PieProductora.jsx';
 import { sugerirCorreo } from '../lib/sugerirCorreo.js';
 
 const tastedOptions = ['1-2', '3-4', '5+'];
@@ -223,12 +223,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, config 
         )}
       </section>
 
-      <footer className="mt-10 flex flex-col items-center gap-2 pb-2 text-center">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-texto-suave/70">
-          Una producción de
-        </p>
-        <img src={logoIkaika} alt="IKAIKA" className="h-20 w-auto max-w-full opacity-80 sm:h-24" />
-      </footer>
+      <PieProductora />
     </main>
   );
 }

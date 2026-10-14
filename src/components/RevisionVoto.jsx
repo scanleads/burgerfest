@@ -1,3 +1,5 @@
+import PieProductora from './PieProductora.jsx';
+
 const categoryLabels = {
   '8_dolares': '$8',
   '10_dolares': '$10',
@@ -88,6 +90,8 @@ export default function RevisionVoto({
         >
           {busy ? 'Votando...' : 'Votar'}
         </button>
+
+        <PieProductora />
       </section>
     </main>
   );

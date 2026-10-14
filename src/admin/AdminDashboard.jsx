@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PieProductora from '../components/PieProductora.jsx';
 import { supabase } from '../lib/supabase.js';
 import AlertasFraude from './AlertasFraude.jsx';
 import ControlEvento from './ControlEvento.jsx';
@@ -66,6 +67,8 @@ export default function AdminDashboard({ session }) {
         <div className="mt-6">
           <ResetDatos onResetDone={() => setRefreshKey((current) => current + 1)} />
         </div>
+
+        <PieProductora className="mt-8 scale-75 opacity-70" />
       </div>
     </main>
   );

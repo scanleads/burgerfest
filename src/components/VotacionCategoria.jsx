@@ -1,4 +1,5 @@
 import HamburguesaCard from './HamburguesaCard.jsx';
+import PieProductora from './PieProductora.jsx';
 
 const categoryLabels = {
   '8_dolares': {
@@ -96,6 +97,8 @@ export default function VotacionCategoria({
             ))}
           </div>
         )}
+
+        <PieProductora />
 
         <div className="sticky bottom-0 -mx-4 mt-5 border-t-2 border-vino-oscuro bg-vino-fondo px-4 py-3">
           <button
