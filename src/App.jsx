@@ -23,6 +23,10 @@ function friendlySupabaseError(error) {
     return 'Usa tu correo personal para votar.';
   }
 
+  if (String(error.message || '').includes('consentimiento_requerido')) {
+    return 'Para votar necesitas aceptar recibir información. Marca la casilla y continúa.';
+  }
+
   return 'No pudimos conectar con la base de datos. Revisa tu senal e intenta otra vez.';
 }
 

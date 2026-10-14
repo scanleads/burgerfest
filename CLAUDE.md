@@ -27,7 +27,7 @@ automático al hacer push a main) · GitHub scanleads/burgerfest (PÚBLICO).
 ## Reglas de negocio
 1. Vota en AMBAS categorías: 1 voto en $8 + 1 voto en $10.
 2. Registro antes de votar: nombre, apellido, correo obligatorios; edad y "cuántas probaste" opcionales.
-3. El consentimiento de marketing es opcional y NUNCA bloquea el voto.
+3. El consentimiento de marketing es obligatorio para votar (desde 14-oct-2026).
 4. Antitrampa: correo único + device_id + unique(participante_id, categoria).
 5. /resultados es PÚBLICA a propósito (se proyecta en el evento). El público no ve leads.
 6. Formulario simple: no añadir fricción. Las medidas antifraude deben ser invisibles para el usuario normal.

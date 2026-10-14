@@ -46,6 +46,11 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, config 
       return;
     }
 
+    if (!form.acepta_marketing) {
+      setLocalError('Para votar necesitas aceptar recibir información. Marca la casilla y continúa.');
+      return;
+    }
+
     setLocalError('');
     onSubmit({
       ...form,
@@ -202,7 +207,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, config 
               className="mt-1 h-5 w-5 accent-dorado"
             />
             <span className="text-sm leading-6 text-texto-suave">
-              Acepto recibir informacion sobre promociones y novedades
+              Acepto recibir información sobre promociones y novedades de Burger Fest y sus aliados. Es necesario para votar.
             </span>
           </label>
 
