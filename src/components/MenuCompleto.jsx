@@ -9,7 +9,7 @@ function descripcionVisible(descripcion) {
   return descripcion || 'Menú por confirmar';
 }
 
-export default function MenuCompleto({ hamburguesas, onVolver }) {
+export default function MenuCompleto({ hamburguesas, onVolver, votacionAbierta = true }) {
   const [openById, setOpenById] = useState({});
 
   const restaurantes = useMemo(() => {
@@ -139,7 +139,7 @@ export default function MenuCompleto({ hamburguesas, onVolver }) {
             onClick={onVolver}
             className="w-full border-2 border-vino-oscuro bg-crema px-4 py-4 font-display text-2xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm"
           >
-            YA VI EL MENÚ, QUIERO VOTAR
+            {votacionAbierta ? 'YA VI EL MENÚ, QUIERO VOTAR' : 'VOLVER'}
           </button>
         </div>
       </section>

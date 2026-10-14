@@ -7,6 +7,7 @@ import RegistroForm from './components/RegistroForm.jsx';
 import RevisionVoto from './components/RevisionVoto.jsx';
 import VotacionCategoria from './components/VotacionCategoria.jsx';
 import { getDeviceId } from './lib/device.js';
+import { fechasEvento } from './lib/faseEvento.js';
 import { supabase } from './lib/supabase.js';
 
 const CATEGORY_8 = '8_dolares';
@@ -89,6 +90,17 @@ export default function App() {
       setConfig(loadedConfig);
 
       if (loadedConfig.estado !== 'abierto') {
+        // Votacion cerrada: si hay fechas de evento validas, cargar el menu (solo lectura).
+        if (fechasEvento(loadedConfig)) {
+          const { data: closedBurgers } = await supabase
+            .from('hamburguesas')
+            .select('id, nombre, restaurante, categoria, foto_url, descripcion, orden, activa')
+            .eq('activa', true)
+            .order('orden', { ascending: true });
+
+          setHamburguesas(closedBurgers || []);
+        }
+
         setStatus('cerrado');
         return;
       }
@@ -326,7 +338,26 @@ export default function App() {
   }
 
   if (status === 'cerrado') {
-    return <PantallaCerrada config={config} />;
+    const fechas = fechasEvento(config);
+    const puedeVerMenu = Boolean(fechas) && hamburguesas.length > 0;
+
+    if (showMenu && puedeVerMenu) {
+      return (
+        <MenuCompleto
+          hamburguesas={hamburguesas}
+          votacionAbierta={false}
+          onVolver={() => setShowMenu(false)}
+        />
+      );
+    }
+
+    return (
+      <PantallaCerrada
+        config={config}
+        fechas={fechas}
+        onVerMenu={puedeVerMenu ? () => setShowMenu(true) : undefined}
+      />
+    );
   }
 
   if (status === 'registro') {
