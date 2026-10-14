@@ -1,4 +1,4 @@
-import logoBurgerFestNegro from '../assets/logo-burgerfest-negro.png';
+import logoBurgerFestColor from '../assets/logo-burgerfest-color.png';
 import PieProductora from './PieProductora.jsx';
 import Ticket, { Renglon, Separador } from './Ticket.jsx';
 
@@ -48,7 +48,7 @@ export default function PantallaBienvenida({ config, fase, falta, onVerMenu }) {
 
         <Ticket className="mt-7 text-left">
           <img
-            src={logoBurgerFestNegro}
+            src={logoBurgerFestColor}
             alt="Burger Fest"
             className="mx-auto h-28 w-auto max-w-full sm:h-36"
           />
