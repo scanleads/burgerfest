@@ -4,13 +4,13 @@
 
 :root {
   color-scheme: dark;
-  --vino-fondo: 122 31 46;
-  --vino-oscuro: 92 22 34;
-  --vino: 158 42 60;
-  --dorado: 242 192 101;
-  --crema: 248 232 219;
+  --vino-fondo: 185 50 28;
+  --vino-oscuro: 26 26 26;
+  --vino: 142 38 20;
+  --dorado: 251 199 43;
+  --crema: 250 246 237;
   --blanco: 255 255 255;
-  --texto-suave: 232 213 200;
+  --texto-suave: 243 227 211;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -26,10 +26,10 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(92, 22, 34, 0.55), transparent 30rem),
-    radial-gradient(circle at bottom right, rgba(92, 22, 34, 0.55), transparent 30rem),
-    #7a1f2e;
-  color: #e8d5c8;
+    radial-gradient(circle at top left, rgba(142, 38, 20, 0.55), transparent 30rem),
+    radial-gradient(circle at bottom right, rgba(142, 38, 20, 0.55), transparent 30rem),
+    #b9321c;
+  color: #f3e3d3;
 }
 
 button,

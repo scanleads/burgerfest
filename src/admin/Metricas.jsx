@@ -74,7 +74,7 @@ export default function Metricas() {
     <section className="border-2 border-vino-oscuro bg-vino/45 p-5 shadow-hard">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-dorado">
+          <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-crema">
             Metricas rapidas
           </p>
           <h2 className="mt-1 font-display text-3xl font-extrabold uppercase text-crema">
@@ -116,7 +116,7 @@ export default function Metricas() {
           </div>
 
           <div>
-            <p className="text-xs font-bold uppercase text-dorado">Hamburguesas probadas</p>
+            <p className="text-xs font-bold uppercase text-crema">Hamburguesas probadas</p>
             <div className="mt-2 space-y-2">
               {Object.entries(metrics.distribucion).map(([label, value]) => (
                 <div className="flex items-center justify-between border border-vino-oscuro bg-vino-oscuro px-3 py-2" key={label}>

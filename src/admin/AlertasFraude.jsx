@@ -111,7 +111,7 @@ function contar(items, keyFn) {
 function TablaSenal({ titulo, ayuda, columnas, filas }) {
   return (
     <div>
-      <p className="text-xs font-bold uppercase text-dorado">{titulo}</p>
+      <p className="text-xs font-bold uppercase text-crema">{titulo}</p>
       <p className="text-xs text-texto-suave">{ayuda}</p>
       {filas.length === 0 ? (
         <p className="mt-2 border-2 border-vino-oscuro bg-vino-oscuro px-3 py-2 text-sm font-semibold text-texto-suave">
@@ -135,7 +135,7 @@ function TablaSenal({ titulo, ayuda, columnas, filas }) {
                   key={fila.key}
                   className={
                     fila.alerta
-                      ? 'bg-red-900/70 font-bold text-white'
+                      ? 'bg-dorado font-bold text-vino-oscuro'
                       : 'border-t border-vino-oscuro text-crema'
                   }
                 >
@@ -286,7 +286,7 @@ export default function AlertasFraude() {
 
   return (
     <section className="border-2 border-vino-oscuro bg-vino/45 p-5 shadow-hard">
-      <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-dorado">
+      <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-crema">
         Antifraude
       </p>
       <h2 className="mt-1 font-display text-3xl font-extrabold uppercase text-crema">Alertas</h2>

@@ -40,7 +40,7 @@ function PuertaClave({ onDesbloquear }) {
           onChange={(event) => setClave(event.target.value)}
           placeholder="Clave"
         />
-        {error ? <p className="mt-2 text-sm font-semibold text-dorado">{error}</p> : null}
+        {error ? <p className="mt-2 text-sm font-semibold text-crema">{error}</p> : null}
         <button
           className="mt-4 w-full border-2 border-vino-oscuro bg-dorado px-4 py-2 font-display text-xl font-extrabold uppercase text-vino-oscuro shadow-hard-sm transition hover:-translate-y-0.5"
           type="submit"

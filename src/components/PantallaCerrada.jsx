@@ -19,7 +19,7 @@ export default function PantallaCerrada({ config, fechas = null, onVerMenu }) {
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-10">
       <section className="w-full max-w-md text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-dorado">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
           {config?.ciudad_activa || 'Barquisimeto'}
         </p>
         <h1 className="mt-4 font-display text-5xl font-extrabold uppercase leading-none text-white">

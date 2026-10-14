@@ -155,7 +155,7 @@ export default function GestionBurgers() {
     <section className="border-2 border-vino-oscuro bg-vino/45 p-5 shadow-hard">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-dorado">
+          <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-crema">
             Gestion de hamburguesas
           </p>
           <h2 className="mt-1 font-display text-4xl font-extrabold uppercase text-crema">
@@ -214,7 +214,7 @@ export default function GestionBurgers() {
       </form>
 
       {loading ? <p className="mt-5 font-semibold text-texto-suave">Cargando hamburguesas...</p> : null}
-      {message ? <p className="mt-4 text-sm font-semibold text-dorado">{message}</p> : null}
+      {message ? <p className="mt-4 text-sm font-semibold text-crema">{message}</p> : null}
       {error ? <p className="mt-4 border border-dorado bg-vino-oscuro px-4 py-3 text-sm font-semibold text-crema">{error}</p> : null}
 
       {!loading ? (
@@ -249,7 +249,7 @@ export default function GestionBurgers() {
                       {burger.foto_url || '-'}
                     </td>
                     <td className="px-3 py-3">
-                      <span className={`border px-2 py-1 text-xs font-bold uppercase ${burger.activa ? 'border-dorado text-dorado' : 'border-crema text-crema'}`}>
+                      <span className={`border px-2 py-1 text-xs font-bold uppercase ${burger.activa ? 'border-dorado bg-dorado text-vino-oscuro' : 'border-crema text-crema'}`}>
                         {burger.activa ? 'Activa' : 'Inactiva'}
                       </span>
                     </td>
@@ -282,7 +282,7 @@ export default function GestionBurgers() {
       {editingBurger ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-vino-oscuro/80 p-4">
           <div className="w-full max-w-lg border-2 border-vino-oscuro bg-vino p-5 shadow-hard">
-            <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-dorado">
+            <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-crema">
               Editar hamburguesa
             </p>
             <h3 className="mt-1 font-display text-3xl font-extrabold uppercase text-crema">
@@ -290,7 +290,7 @@ export default function GestionBurgers() {
             </h3>
 
             <form className="mt-4 flex flex-col gap-3" onSubmit={handleEditSubmit}>
-              <label className="flex flex-col gap-1 text-xs font-bold uppercase text-dorado">
+              <label className="flex flex-col gap-1 text-xs font-bold uppercase text-crema">
                 Nombre
                 <input
                   className="border-2 border-vino-oscuro bg-blanco px-3 py-2 text-vino-oscuro outline-none focus:border-dorado"
@@ -300,7 +300,7 @@ export default function GestionBurgers() {
                   required
                 />
               </label>
-              <label className="flex flex-col gap-1 text-xs font-bold uppercase text-dorado">
+              <label className="flex flex-col gap-1 text-xs font-bold uppercase text-crema">
                 Restaurante
                 <input
                   className="border-2 border-vino-oscuro bg-blanco px-3 py-2 text-vino-oscuro outline-none focus:border-dorado"
@@ -310,7 +310,7 @@ export default function GestionBurgers() {
                   required
                 />
               </label>
-              <label className="flex flex-col gap-1 text-xs font-bold uppercase text-dorado">
+              <label className="flex flex-col gap-1 text-xs font-bold uppercase text-crema">
                 Descripcion
                 <textarea
                   className="min-h-[7rem] border-2 border-vino-oscuro bg-blanco px-3 py-2 text-vino-oscuro outline-none focus:border-dorado"

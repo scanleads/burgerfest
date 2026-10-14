@@ -56,7 +56,7 @@ export default function VotacionCategoria({
         </div>
 
         <header className="mb-5 mt-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-dorado">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
             BurgerFest
           </p>
           <h1 className="mt-2 font-display text-4xl font-extrabold uppercase leading-none text-white sm:text-5xl">
@@ -74,7 +74,7 @@ export default function VotacionCategoria({
         )}
 
         {error && (
-          <div className="mb-4 border-2 border-red-300/50 bg-red-500/20 px-4 py-3 text-sm text-red-100">
+          <div className="mb-4 border-2 border-dorado bg-vino-oscuro px-4 py-3 text-sm text-crema">
             {error}
           </div>
         )}

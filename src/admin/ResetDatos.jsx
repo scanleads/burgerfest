@@ -100,7 +100,7 @@ export default function ResetDatos({ onResetDone }) {
   const canConfirmFinal = confirmText === PALABRA_CONFIRMACION && !resetting;
 
   return (
-    <section className="border-2 border-red-700 bg-red-950/40 p-5 shadow-hard">
+    <section className="border-2 border-red-500 bg-vino-oscuro p-5 shadow-hard">
       <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-red-400">
         Zona de peligro
       </p>
@@ -116,11 +116,11 @@ export default function ResetDatos({ onResetDone }) {
         <p className="mt-4 font-semibold text-texto-suave">Cargando conteos...</p>
       ) : (
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="border-2 border-red-700 bg-vino-oscuro p-3">
+          <div className="border-2 border-red-500 bg-vino-oscuro p-3">
             <p className="text-xs font-bold uppercase text-texto-suave">Votos actuales</p>
             <p className="font-display text-3xl font-extrabold text-red-400">{counts.votos}</p>
           </div>
-          <div className="border-2 border-red-700 bg-vino-oscuro p-3">
+          <div className="border-2 border-red-500 bg-vino-oscuro p-3">
             <p className="text-xs font-bold uppercase text-texto-suave">Participantes actuales</p>
             <p className="font-display text-3xl font-extrabold text-red-400">{counts.participantes}</p>
           </div>
@@ -128,7 +128,7 @@ export default function ResetDatos({ onResetDone }) {
       )}
 
       {countsError ? (
-        <p className="mt-4 border border-red-700 bg-vino-oscuro px-3 py-2 text-sm font-semibold text-crema">{countsError}</p>
+        <p className="mt-4 border border-red-500 bg-vino-oscuro px-3 py-2 text-sm font-semibold text-crema">{countsError}</p>
       ) : null}
       {successMessage ? (
         <p className="mt-4 border border-dorado bg-vino-oscuro px-3 py-2 text-sm font-semibold text-crema">{successMessage}</p>
@@ -145,7 +145,7 @@ export default function ResetDatos({ onResetDone }) {
 
       {step === 1 ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-vino-oscuro/80 p-4">
-          <div className="w-full max-w-md border-2 border-red-700 bg-vino p-5 shadow-hard">
+          <div className="w-full max-w-md border-2 border-red-500 bg-vino-oscuro p-5 shadow-hard">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-red-400">
               Confirmar reinicio
             </p>
@@ -180,7 +180,7 @@ export default function ResetDatos({ onResetDone }) {
 
       {step === 2 ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-vino-oscuro/80 p-4">
-          <div className="w-full max-w-md border-2 border-red-700 bg-vino p-5 shadow-hard">
+          <div className="w-full max-w-md border-2 border-red-500 bg-vino-oscuro p-5 shadow-hard">
             <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-red-400">
               Ultimo paso
             </p>
@@ -201,7 +201,7 @@ export default function ResetDatos({ onResetDone }) {
             />
 
             {resetError ? (
-              <p className="mt-3 border border-red-700 bg-vino-oscuro px-3 py-2 text-sm font-semibold text-crema">{resetError}</p>
+              <p className="mt-3 border border-red-500 bg-vino-oscuro px-3 py-2 text-sm font-semibold text-crema">{resetError}</p>
             ) : null}
 
             <div className="mt-5 flex justify-end gap-3">

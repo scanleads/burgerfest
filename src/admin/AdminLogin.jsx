@@ -28,7 +28,7 @@ export default function AdminLogin({ initialError = '' }) {
     <main className="min-h-screen bg-vino-fondo px-4 py-8 text-texto-suave">
       <section className="mx-auto flex min-h-[78vh] max-w-md flex-col justify-center">
         <div className="border-2 border-vino-oscuro bg-vino/45 p-6 shadow-hard">
-          <p className="font-display text-sm font-bold uppercase tracking-[0.18em] text-dorado">
+          <p className="font-display text-sm font-bold uppercase tracking-[0.18em] text-crema">
             Panel de administracion
           </p>
           <h1 className="mt-2 font-display text-5xl font-extrabold uppercase leading-none text-crema">

@@ -7,7 +7,7 @@ export default function Confirmacion({ votos }) {
   return (
     <main className="min-h-screen px-4 py-8">
       <section className="mx-auto w-full max-w-md text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-dorado">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
           Voto registrado
         </p>
         <h1 className="mt-3 font-display text-5xl font-extrabold uppercase leading-none text-white">

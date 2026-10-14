@@ -115,7 +115,7 @@ export default function RankingVivo() {
     <section className="border-2 border-vino-oscuro bg-vino/45 p-5 shadow-hard">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-dorado">
+          <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-crema">
             Resultados en vivo
           </p>
           <h2 className="mt-1 font-display text-4xl font-extrabold uppercase text-crema">

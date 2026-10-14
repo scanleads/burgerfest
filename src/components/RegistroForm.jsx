@@ -207,7 +207,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, config 
           </label>
 
           {(localError || error) && (
-            <p className="border-2 border-red-300/50 bg-red-500/20 px-3 py-2 text-sm text-red-100">
+            <p className="border-2 border-dorado bg-vino-oscuro px-3 py-2 text-sm text-crema">
               {localError || error}
             </p>
           )}

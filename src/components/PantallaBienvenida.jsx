@@ -17,7 +17,7 @@ function Cuenta({ milisegundos }) {
 
   return (
     <div className="mt-6">
-      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-dorado">
+      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
         Cuenta regresiva para el 17 de octubre
       </p>
       <div className="mt-3 grid grid-cols-4 gap-2">

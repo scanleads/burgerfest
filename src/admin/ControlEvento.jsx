@@ -62,7 +62,7 @@ export default function ControlEvento() {
     <section className="border-2 border-vino-oscuro bg-vino/45 p-5 shadow-hard">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-dorado">
+          <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-crema">
             Control del evento
           </p>
           <h2 className="mt-1 font-display text-3xl font-extrabold uppercase text-crema">
@@ -115,7 +115,7 @@ export default function ControlEvento() {
         </div>
       )}
 
-      {saving ? <p className="mt-3 text-sm font-semibold text-dorado">Guardando cambio...</p> : null}
+      {saving ? <p className="mt-3 text-sm font-semibold text-crema">Guardando cambio...</p> : null}
       {error ? <p className="mt-3 border border-dorado bg-vino-oscuro px-3 py-2 text-sm font-semibold text-crema">{error}</p> : null}
     </section>
   );

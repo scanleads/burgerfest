@@ -30,7 +30,7 @@ export default function AdminDashboard({ session }) {
       <div className="mx-auto max-w-7xl">
         <header className="flex flex-col gap-4 border-b-2 border-vino-oscuro pb-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="font-display text-sm font-bold uppercase tracking-[0.18em] text-dorado">
+            <p className="font-display text-sm font-bold uppercase tracking-[0.18em] text-crema">
               BurgerFest Admin
             </p>
             <h1 className="mt-1 font-display text-5xl font-extrabold uppercase leading-none text-crema md:text-6xl">
@@ -39,7 +39,7 @@ export default function AdminDashboard({ session }) {
             <p className="mt-2 text-sm font-semibold text-texto-suave">{email}</p>
           </div>
           <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-            {signOutError ? <p className="text-sm font-semibold text-dorado">{signOutError}</p> : null}
+            {signOutError ? <p className="text-sm font-semibold text-crema">{signOutError}</p> : null}
             <button
               className="border-2 border-vino-oscuro bg-crema px-4 py-2 font-display text-xl font-extrabold uppercase text-vino-oscuro shadow-hard-sm transition hover:-translate-y-0.5"
               type="button"

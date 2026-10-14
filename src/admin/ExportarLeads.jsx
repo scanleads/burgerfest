@@ -151,7 +151,7 @@ export default function ExportarLeads() {
 
   return (
     <section className="border-2 border-vino-oscuro bg-vino/45 p-5 shadow-hard">
-      <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-dorado">
+      <p className="font-display text-sm font-bold uppercase tracking-[0.16em] text-crema">
         Exportar leads
       </p>
       <h2 className="mt-1 font-display text-3xl font-extrabold uppercase text-crema">
@@ -165,7 +165,7 @@ export default function ExportarLeads() {
       >
         {busy ? 'Preparando CSV...' : 'Descargar leads CSV'}
       </button>
-      {message ? <p className="mt-3 text-sm font-semibold text-dorado">{message}</p> : null}
+      {message ? <p className="mt-3 text-sm font-semibold text-crema">{message}</p> : null}
       {error ? <p className="mt-3 border border-dorado bg-vino-oscuro px-3 py-2 text-sm font-semibold text-crema">{error}</p> : null}
     </section>
   );

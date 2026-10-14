@@ -38,7 +38,7 @@ function FichaBurger({ burger, isOpen, onToggle }) {
         )}
       </div>
       <div className="p-2 sm:p-3">
-        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-dorado">
+        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-crema">
           {categoryLabels[burger.categoria] || burger.categoria}
         </p>
         <h3 className="mt-1 break-words font-display text-xl font-extrabold uppercase leading-tight text-white sm:text-2xl">
@@ -48,7 +48,7 @@ function FichaBurger({ burger, isOpen, onToggle }) {
           type="button"
           onClick={onToggle}
           aria-expanded={isOpen}
-          className="tap-highlight-none mt-2 w-full border-2 border-dorado bg-transparent px-2 py-2 text-xs font-extrabold uppercase text-dorado transition hover:translate-x-[2px] hover:translate-y-[2px] sm:text-sm"
+          className="tap-highlight-none mt-2 w-full border-2 border-dorado bg-transparent px-2 py-2 text-xs font-extrabold uppercase text-crema transition hover:translate-x-[2px] hover:translate-y-[2px] sm:text-sm"
         >
           Ingredientes
         </button>
@@ -102,7 +102,7 @@ export default function MenuCompleto({ hamburguesas, onVolver, votacionAbierta =
     <main className="min-h-screen px-4 py-5">
       <section className="mx-auto w-full max-w-3xl">
         <header className="mb-5 mt-3">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-dorado">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
             BurgerFest
           </p>
           <h1 className="mt-2 font-display text-4xl font-extrabold uppercase leading-none text-white sm:text-5xl">

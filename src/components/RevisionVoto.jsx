@@ -26,7 +26,7 @@ export default function RevisionVoto({
   return (
     <main className="min-h-screen px-4 py-8">
       <section className="mx-auto w-full max-w-md">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-dorado">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
           BurgerFest
         </p>
         <h1 className="mt-3 font-display text-5xl font-extrabold uppercase leading-none text-white">
@@ -37,7 +37,7 @@ export default function RevisionVoto({
         </p>
 
         {error && (
-          <div className="mt-5 border-2 border-red-300/50 bg-red-500/20 px-4 py-3 text-sm text-red-100">
+          <div className="mt-5 border-2 border-dorado bg-vino-oscuro px-4 py-3 text-sm text-crema">
             {error}
           </div>
         )}
