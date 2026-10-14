@@ -3,7 +3,7 @@ import PieProductora from './PieProductora.jsx';
 import Ticket, { Renglon, Separador } from './Ticket.jsx';
 
 const FECHA = '17 Y 18 OCT';
-const LUGAR = 'TERRAZA HOTEL TRINITARIA SUITES';
+const LUGAR = 'TERRAZA HOTEL TRINITARIAS SUITES';
 
 function pad(numero) {
   return String(numero).padStart(2, '0');
