@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase.js';
+import { BotonPlegar, useSeccionPlegable } from './Plegable.jsx';
 
 const CATEGORIES = [
   { id: '8_dolares', label: 'Mejor hamburguesa de $8' },
@@ -66,6 +67,7 @@ function CategoryRanking({ category, rows }) {
 }
 
 export default function RankingVivo() {
+  const [abierta, alternarSeccion] = useSeccionPlegable('ranking-vivo', true);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -144,14 +146,19 @@ export default function RankingVivo() {
             Ranking por categoria
           </h2>
         </div>
-        <div className="text-sm font-semibold text-texto-suave">
-          {refreshing ? 'Actualizando...' : lastUpdated ? `Actualizado ${lastUpdated.toLocaleTimeString('es-VE')}` : ''}
+        <div className="flex items-center gap-3">
+          <div className="text-sm font-semibold text-texto-suave">
+            {refreshing ? 'Actualizando...' : lastUpdated ? `Actualizado ${lastUpdated.toLocaleTimeString('es-VE')}` : ''}
+          </div>
+          <BotonPlegar abierta={abierta} onClick={alternarSeccion} controla="contenido-ranking-vivo" />
         </div>
       </div>
 
       {cuarentena !== null ? (
         <p className="mt-3 text-sm font-semibold text-texto-suave">Votos en cuarentena: {cuarentena}</p>
       ) : null}
+      {/* Plegar solo oculta con CSS: el componente sigue montado y el ranking sigue refrescandose cada 12 s */}
+      <div id="contenido-ranking-vivo" className={abierta ? '' : 'hidden'}>
       {loading ? <p className="mt-5 font-semibold text-texto-suave">Cargando ranking...</p> : null}
       {error ? <p className="mt-5 border border-dorado bg-vino-oscuro px-4 py-3 text-sm font-semibold text-crema">{error}</p> : null}
 
@@ -166,6 +173,7 @@ export default function RankingVivo() {
           ))}
         </div>
       ) : null}
+      </div>
     </section>
   );
 }

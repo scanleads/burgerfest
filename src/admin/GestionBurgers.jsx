@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase.js';
+import { BotonPlegar, useSeccionPlegable } from './Plegable.jsx';
 
 const INITIAL_FORM = {
   nombre: '',
@@ -13,6 +14,7 @@ function categoryLabel(category) {
 }
 
 export default function GestionBurgers() {
+  const [abierta, alternarSeccion] = useSeccionPlegable('gestion-burgers', false);
   const [burgers, setBurgers] = useState([]);
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(true);
@@ -162,15 +164,21 @@ export default function GestionBurgers() {
             Competidores
           </h2>
         </div>
-        <button
-          className="border border-vino-oscuro bg-vino-oscuro px-3 py-2 text-xs font-bold uppercase text-crema"
-          type="button"
-          onClick={loadBurgers}
-          disabled={loading}
-        >
-          Refrescar
-        </button>
+        <div className="flex gap-2">
+          <button
+            className="border border-vino-oscuro bg-vino-oscuro px-3 py-2 text-xs font-bold uppercase text-crema"
+            type="button"
+            onClick={loadBurgers}
+            disabled={loading}
+          >
+            Refrescar
+          </button>
+          <BotonPlegar abierta={abierta} onClick={alternarSeccion} controla="contenido-gestion-burgers" />
+        </div>
       </div>
+
+      {/* Plegar solo oculta con CSS: el componente sigue montado y no pierde el estado de los formularios */}
+      <div id="contenido-gestion-burgers" className={abierta ? '' : 'hidden'}>
 
       <form className="mt-5 grid gap-3 border-2 border-vino-oscuro bg-vino/35 p-4 md:grid-cols-5" onSubmit={handleSubmit}>
         <input
@@ -346,6 +354,7 @@ export default function GestionBurgers() {
           </div>
         </div>
       ) : null}
+      </div>
     </section>
   );
 }
