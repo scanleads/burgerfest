@@ -30,6 +30,14 @@ function friendlySupabaseError(error) {
   return 'No pudimos conectar con la base de datos. Revisa tu senal e intenta otra vez.';
 }
 
+function zonaHoraria() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+  } catch {
+    return null;
+  }
+}
+
 function normalizeConfig(rows = []) {
   return rows.reduce((acc, row) => {
     acc[row.clave] = row.valor;
@@ -168,6 +176,7 @@ export default function App() {
       p_acepta_marketing: form.acepta_marketing || false,
       p_device_id: getDeviceId(),
       p_ciudad: ciudad,
+      p_zona_horaria: zonaHoraria(),
     });
 
     if (rpcError || !participanteId) {
