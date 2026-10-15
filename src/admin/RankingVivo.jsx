@@ -93,18 +93,25 @@ export default function RankingVivo() {
       setRows(data || []);
       setLastUpdated(new Date());
 
-      // Votos en cuarentena = votos de hamburguesas activas - votos que cuenta la vista.
-      // Si esta consulta falla, simplemente no se muestra la linea.
-      const { count, error: countError } = await supabase
-        .from('votos')
-        .select('id, hamburguesas!inner(activa)', { count: 'exact', head: true })
-        .eq('hamburguesas.activa', true);
+      // Votos en cuarentena = votos de las hamburguesas activas (las que devuelve la vista) - votos que cuenta la vista.
+      // Si esta consulta falla, se registra en consola y no se muestra la linea.
+      const ids = (data || []).map((row) => row.id);
 
-      if (countError || count === null) {
-        setCuarentena(null);
+      if (ids.length === 0) {
+        setCuarentena(0);
       } else {
-        const contados = (data || []).reduce((sum, row) => sum + Number(row.total_votos || 0), 0);
-        setCuarentena(Math.max(0, count - contados));
+        const { count, error: countError } = await supabase
+          .from('votos')
+          .select('id', { count: 'exact', head: true })
+          .in('hamburguesa_id', ids);
+
+        if (countError || count === null) {
+          console.error('No pudimos contar los votos en cuarentena:', countError);
+          setCuarentena(null);
+        } else {
+          const contados = (data || []).reduce((sum, row) => sum + Number(row.total_votos || 0), 0);
+          setCuarentena(Math.max(0, count - contados));
+        }
       }
     }
 

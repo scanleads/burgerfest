@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase.js';
 
 const EMPTY_DISTRIBUTION = { '1-2': 0, '3-4': 0, '5+': 0 };
+const OPCIONES_PROBADAS = Object.keys(EMPTY_DISTRIBUTION);
 
 export default function Metricas() {
   const [metrics, setMetrics] = useState({
@@ -18,14 +19,19 @@ export default function Metricas() {
     setLoading(true);
     setError('');
 
+    // Todo son conteos en el servidor (head: true): no se descarga ninguna fila ni se topa con el limite de 1000.
     const [
       participantesResult,
+      marketingResult,
       votos8Result,
       votos10Result,
+      ...probadasResults
     ] = await Promise.all([
+      supabase.from('participantes').select('id', { count: 'exact', head: true }),
       supabase
         .from('participantes')
-        .select('hamburguesas_probadas, acepta_marketing'),
+        .select('id', { count: 'exact', head: true })
+        .eq('acepta_marketing', true),
       supabase
         .from('votos')
         .select('id', { count: 'exact', head: true })
@@ -34,34 +40,35 @@ export default function Metricas() {
         .from('votos')
         .select('id', { count: 'exact', head: true })
         .eq('categoria', '10_dolares'),
+      ...OPCIONES_PROBADAS.map((opcion) =>
+        supabase
+          .from('participantes')
+          .select('id', { count: 'exact', head: true })
+          .eq('hamburguesas_probadas', opcion),
+      ),
     ]);
 
-    if (participantesResult.error || votos8Result.error || votos10Result.error) {
+    const failed = [participantesResult, marketingResult, votos8Result, votos10Result, ...probadasResults].some(
+      (result) => result.error,
+    );
+
+    if (failed) {
       setError('No pudimos cargar las metricas del panel.');
       setLoading(false);
       return;
     }
 
-    const participantes = participantesResult.data || [];
-    const distribucion = participantes.reduce(
-      (acc, row) => {
-        const bucket = row.hamburguesas_probadas;
-
-        if (bucket && acc[bucket] !== undefined) {
-          acc[bucket] += 1;
-        }
-
-        return acc;
-      },
-      { ...EMPTY_DISTRIBUTION },
-    );
+    const distribucion = { ...EMPTY_DISTRIBUTION };
+    OPCIONES_PROBADAS.forEach((opcion, index) => {
+      distribucion[opcion] = probadasResults[index].count || 0;
+    });
 
     setMetrics({
-      participantes: participantes.length,
+      participantes: participantesResult.count || 0,
       votos8: votos8Result.count || 0,
       votos10: votos10Result.count || 0,
       distribucion,
-      marketing: participantes.filter((row) => row.acepta_marketing === true).length,
+      marketing: marketingResult.count || 0,
     });
     setLoading(false);
   }
