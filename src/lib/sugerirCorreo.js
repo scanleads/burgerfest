@@ -53,6 +53,10 @@ function distancia(a, b) {
   return d[a.length][b.length];
 }
 
+// Terminaciones que NO existen como TLD: ".com" es siempre seguro para cualquier dominio.
+// (.co, .cm y .om son TLD reales y solo se corrigen para dominios conocidos.)
+const TLD_INEXISTENTE = /\.(con|cpm|xom|vom|ocm|coom|comm|comd)$/;
+
 function corregirTerminacion(dominio) {
   return dominio
     .replace(/\.com(\.?com)+$/, '.com')
@@ -77,12 +81,16 @@ export function sugerirCorreo(correo) {
     if (DOMINIOS_LEGITIMOS.includes(corregido)) return null;
     if (DOMINIOS_CONOCIDOS.includes(corregido)) return `${local}@${corregido}`;
 
+    // Si no hay coincidencia con un dominio conocido, una terminacion inexistente igual se corrige a .com.
+    const soloTerminacion =
+      TLD_INEXISTENTE.test(dominio) && !corregido.endsWith('com.com') ? `${local}@${corregido}` : null;
+
     // Distancia de edicion: solo dominios de dos partes (sin subdominios ni .com.ve, .edu, etc.)
     const partes = corregido.split('.');
-    if (partes.length !== 2 || !TLD_FUZZY.includes(partes[1])) return null;
+    if (partes.length !== 2 || !TLD_FUZZY.includes(partes[1])) return soloTerminacion;
 
     const [sld, tld] = partes;
-    if (sld.length < MIN_SLD_ESCRITO) return null;
+    if (sld.length < MIN_SLD_ESCRITO) return soloTerminacion;
 
     let mejor = null;
     let mejorDistancia = Infinity;
@@ -105,7 +113,7 @@ export function sugerirCorreo(correo) {
       }
     }
 
-    if (!mejor || empate) return null;
+    if (!mejor || empate) return soloTerminacion;
 
     return `${local}@${mejor}`;
   } catch {

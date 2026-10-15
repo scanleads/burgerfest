@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase.js';
+import { ZONA, fueraDeZona } from '../lib/zonaHoraria.js';
 
 // Umbrales (editar aqui). Una fila se resalta en rojo cuando llega al umbral.
 const RAFAGA_MOSTRAR = 5; // se muestra desde N votos al mismo local en el mismo minuto
@@ -30,8 +31,6 @@ const DOMINIOS_COMUNES = [
   'me.com',
 ];
 
-const ZONA = 'America/Caracas';
-const ZONAS_SIN_DATO = ['UTC', 'Etc/UTC']; // navegadores de privacidad: cuentan como sin dato
 const PAIS_LOCAL = 'VE';
 const PAGE_SIZE = 1000;
 
@@ -111,11 +110,6 @@ function contar(items, keyFn) {
     counts.set(key, (counts.get(key) || 0) + 1);
   }
   return counts;
-}
-
-// Misma regla que la vista ranking_hamburguesas: zona vacia, UTC o America/Caracas no es "fuera de zona".
-function fueraDeZona(zona) {
-  return Boolean(zona) && zona !== ZONA && !ZONAS_SIN_DATO.includes(zona);
 }
 
 function TablaSenal({ titulo, ayuda, columnas, filas }) {
