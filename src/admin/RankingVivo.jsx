@@ -155,12 +155,20 @@ export default function RankingVivo() {
       </div>
 
       {cuarentena !== null ? (
-        <p className="mt-3 text-sm font-semibold text-texto-suave">Votos en cuarentena: {cuarentena}</p>
+        cuarentena > 0 ? (
+          <p className="mt-3 inline-block border-2 border-vino-oscuro bg-dorado px-3 py-1 font-display text-lg font-extrabold uppercase text-vino-oscuro">
+            Votos en cuarentena: {cuarentena}
+          </p>
+        ) : (
+          <p className="mt-3 inline-block border border-crema/40 px-2 py-0.5 text-sm text-crema">
+            Votos en cuarentena: {cuarentena}
+          </p>
+        )
       ) : null}
+      {error ? <p className="mt-5 border border-dorado bg-vino-oscuro px-4 py-3 text-sm font-semibold text-crema">{error}</p> : null}
       {/* Plegar solo oculta con CSS: el componente sigue montado y el ranking sigue refrescandose cada 12 s */}
       <div id="contenido-ranking-vivo" className={abierta ? '' : 'hidden'}>
       {loading ? <p className="mt-5 font-semibold text-texto-suave">Cargando ranking...</p> : null}
-      {error ? <p className="mt-5 border border-dorado bg-vino-oscuro px-4 py-3 text-sm font-semibold text-crema">{error}</p> : null}
 
       {!loading ? (
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
