@@ -24,7 +24,7 @@ const CSV_COLUMNS = [
 // Columnas extra del CSV interno (Scanleads). Nunca van en el CSV del cliente.
 const INTERNAL_COLUMNS = [...CSV_COLUMNS, 'ip', 'pais', 'zona_horaria', 'revision', 'cuenta_en_ranking'];
 
-// Excel convierte "1-2" y "3-4" en fechas; en el CSV del cliente se escriben como texto.
+// Excel convierte "1-2" y "3-4" en fechas; en ambos CSV se escriben como texto.
 const PROBADAS_CLIENTE = { '1-2': '1 a 2', '3-4': '3 a 4', '5+': '5 o más' };
 
 const PAGE_SIZE = 1000;
@@ -146,9 +146,7 @@ export default function ExportarLeads() {
       const voto10 = votoColumnas(lead.id, '10_dolares');
       return {
         ...lead,
-        hamburguesas_probadas: interno
-          ? lead.hamburguesas_probadas
-          : PROBADAS_CLIENTE[lead.hamburguesas_probadas] ?? lead.hamburguesas_probadas,
+        hamburguesas_probadas: PROBADAS_CLIENTE[lead.hamburguesas_probadas] ?? lead.hamburguesas_probadas,
         voto_8_hamburguesa: voto8.hamburguesa,
         voto_8_local: voto8.local,
         voto_10_hamburguesa: voto10.hamburguesa,
