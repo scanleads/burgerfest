@@ -12,6 +12,9 @@ const DISPOSITIVO_MOSTRAR = 2; // se muestra un device_id con MAS de N registros
 const DISPOSITIVO_ALERTA = 10; // rojo desde N registros...
 const DISPOSITIVO_PCT_ALERTA = 50; // ...Y si el local mas votado tiene >= este % de sus votos
 const DEVICE_CHARS = 12; // caracteres del device_id que se muestran
+const UBICACION_MOSTRAR = 1; // se muestra un local con al menos N votos fuera de zona o de pais
+const UBICACION_ALERTA_VOTOS = 5; // rojo desde N votos fuera de zona horaria...
+const UBICACION_ALERTA_PCT = 20; // ...Y si son >= este % de los votos del local
 const MAX_FILAS = 30; // filas mostradas en las demas senales
 
 const DOMINIOS_COMUNES = [
@@ -28,6 +31,8 @@ const DOMINIOS_COMUNES = [
 ];
 
 const ZONA = 'America/Caracas';
+const ZONAS_SIN_DATO = ['UTC', 'Etc/UTC']; // navegadores de privacidad: cuentan como sin dato
+const PAIS_LOCAL = 'VE';
 const PAGE_SIZE = 1000;
 
 const partsFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -108,6 +113,11 @@ function contar(items, keyFn) {
   return counts;
 }
 
+// Misma regla que la vista ranking_hamburguesas: zona vacia, UTC o America/Caracas no es "fuera de zona".
+function fueraDeZona(zona) {
+  return Boolean(zona) && zona !== ZONA && !ZONAS_SIN_DATO.includes(zona);
+}
+
 function TablaSenal({ titulo, ayuda, columnas, filas }) {
   return (
     <div>
@@ -164,7 +174,8 @@ export default function AlertasFraude() {
     setBusy(true);
     setError('');
 
-    const [votosResult, hamburguesasResult, dominiosResult, dispositivosResult] = await Promise.all([
+    const [votosResult, hamburguesasResult, dominiosResult, dispositivosResult, ubicacionResult, filtroResult] =
+      await Promise.all([
       fetchAllRows(() =>
         supabase
           .from('votos')
@@ -189,10 +200,21 @@ export default function AlertasFraude() {
           .not('device_id', 'is', null)
           .order('id', { ascending: true })
       ),
+      fetchAllRows(() =>
+        supabase
+          .from('participantes')
+          .select('id, zona_horaria, pais, revision')
+          .order('id', { ascending: true })
+      ),
+      supabase.from('config').select('valor').eq('clave', 'filtro_zona_horaria').maybeSingle(),
     ]);
 
     const failed =
-      votosResult.error || hamburguesasResult.error || dominiosResult.error || dispositivosResult.error;
+      votosResult.error ||
+      hamburguesasResult.error ||
+      dominiosResult.error ||
+      dispositivosResult.error ||
+      ubicacionResult.error;
 
     if (failed) {
       setError('No pudimos analizar los datos. Revisa tu sesion de admin e intenta de nuevo.');
@@ -279,7 +301,37 @@ export default function AlertasFraude() {
         };
       });
 
-    setSenales({ rafagas, dominios, horas, dispositivos });
+    // Ubicacion: votos por local con zona horaria fuera de America/Caracas (los que el filtro automatico quita,
+    // salvo rescatados con revision = 'valido') y votos con pais distinto de VE (solo informativo: VPN).
+    const ubicacionDe = new Map(ubicacionResult.data.map((p) => [p.id, p]));
+    const porLocal = new Map();
+    let excluidosManual = 0;
+    for (const voto of votosTodos) {
+      const p = ubicacionDe.get(voto.participante_id);
+      const fila = porLocal.get(voto.restaurante) || { total: 0, fueraZona: 0, fueraPais: 0 };
+      fila.total += 1;
+      if (p) {
+        if (p.revision === 'excluido') excluidosManual += 1;
+        if (fueraDeZona(p.zona_horaria) && p.revision !== 'valido') fila.fueraZona += 1;
+        if (p.pais && p.pais !== PAIS_LOCAL) fila.fueraPais += 1;
+      }
+      porLocal.set(voto.restaurante, fila);
+    }
+
+    const ubicacion = [...porLocal]
+      .filter(([, f]) => f.fueraZona >= UBICACION_MOSTRAR || f.fueraPais >= UBICACION_MOSTRAR)
+      .map(([restaurante, f]) => ({ restaurante, ...f, pct: (f.fueraZona / f.total) * 100 }))
+      .sort((a, b) => b.fueraZona - a.fueraZona || b.fueraPais - a.fueraPais)
+      .slice(0, MAX_FILAS)
+      .map((row) => ({
+        key: row.restaurante,
+        alerta: row.fueraZona >= UBICACION_ALERTA_VOTOS && row.pct >= UBICACION_ALERTA_PCT,
+        celdas: [row.restaurante, row.fueraZona, row.fueraPais, row.total, `${Math.round(row.pct)}%`],
+      }));
+
+    const filtroValor = filtroResult.error ? null : filtroResult.data?.valor ?? null;
+
+    setSenales({ rafagas, dominios, horas, dispositivos, ubicacion, filtroValor, excluidosManual });
     setLastRun(lastRunFormatter.format(new Date()));
     setBusy(false);
   }
@@ -331,6 +383,14 @@ export default function AlertasFraude() {
             ayuda={`Mas de ${DISPOSITIVO_MOSTRAR} registros con el mismo dispositivo; rojo desde ${DISPOSITIVO_ALERTA} registros y ${DISPOSITIVO_PCT_ALERTA}% o mas de sus votos al mismo local`}
             columnas={['Dispositivo', 'Registros', 'Local mas votado']}
             filas={senales.dispositivos}
+          />
+          <TablaSenal
+            titulo="Ubicacion"
+            ayuda={`Filtro automatico por zona horaria: ${
+              senales.filtroValor === 'si' ? 'ACTIVO' : senales.filtroValor === 'no' ? 'APAGADO' : 'sin configurar (apagado)'
+            }. Excluidos manualmente: ${senales.excluidosManual} votos. Fuera de zona = zona distinta de America/Caracas (UTC cuenta como sin dato); con el filtro activo esos votos no suman. Pais distinto de VE es solo informativo (VPN). Rojo desde ${UBICACION_ALERTA_VOTOS} votos fuera de zona y ${UBICACION_ALERTA_PCT}% o mas de los votos del local`}
+            columnas={['Local', 'Fuera de zona', 'Pais distinto de VE', 'Votos del local', '% fuera de zona']}
+            filas={senales.ubicacion}
           />
         </div>
       ) : null}

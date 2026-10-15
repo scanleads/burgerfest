@@ -71,6 +71,7 @@ export default function RankingVivo() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [cuarentena, setCuarentena] = useState(null);
 
   async function loadRanking(showLoader = false) {
     if (showLoader) {
@@ -91,6 +92,20 @@ export default function RankingVivo() {
     } else {
       setRows(data || []);
       setLastUpdated(new Date());
+
+      // Votos en cuarentena = votos de hamburguesas activas - votos que cuenta la vista.
+      // Si esta consulta falla, simplemente no se muestra la linea.
+      const { count, error: countError } = await supabase
+        .from('votos')
+        .select('id, hamburguesas!inner(activa)', { count: 'exact', head: true })
+        .eq('hamburguesas.activa', true);
+
+      if (countError || count === null) {
+        setCuarentena(null);
+      } else {
+        const contados = (data || []).reduce((sum, row) => sum + Number(row.total_votos || 0), 0);
+        setCuarentena(Math.max(0, count - contados));
+      }
     }
 
     setLoading(false);
@@ -127,6 +142,9 @@ export default function RankingVivo() {
         </div>
       </div>
 
+      {cuarentena !== null ? (
+        <p className="mt-3 text-sm font-semibold text-texto-suave">Votos en cuarentena: {cuarentena}</p>
+      ) : null}
       {loading ? <p className="mt-5 font-semibold text-texto-suave">Cargando ranking...</p> : null}
       {error ? <p className="mt-5 border border-dorado bg-vino-oscuro px-4 py-3 text-sm font-semibold text-crema">{error}</p> : null}
 
