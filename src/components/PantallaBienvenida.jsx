@@ -21,7 +21,7 @@ function Cuenta({ milisegundos }) {
   return (
     <div>
       <p className="text-center text-xs font-bold uppercase tracking-[0.15em]">
-        Cuenta regresiva para el 17 de octubre
+        La votación abre en
       </p>
       <div className="mt-3 grid grid-cols-4 gap-2">
         {unidades.map(({ etiqueta, valor }) => (
