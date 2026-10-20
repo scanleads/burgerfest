@@ -1,15 +1,16 @@
 import Confirmacion from '../components/Confirmacion.jsx';
 import PantallaBienvenida from '../components/PantallaBienvenida.jsx';
 import RevisionVoto from '../components/RevisionVoto.jsx';
-import { fechasEvento, useAhora } from './faseEvento.js';
+import { useEffect, useState } from 'react';
 
 // Solo desarrollo (npm run dev): ?preview=bienvenida | revision | confirmacion
 // Datos ficticios fijos, sin llamadas a Supabase. main.jsx lo importa solo si import.meta.env.DEV.
 
-const config = {
-  ciudad_activa: 'Barquisimeto',
-  inicio_evento: '2026-10-17T10:00:00-04:00',
-  fin_evento: '2026-10-18T23:00:00-04:00',
+const evento = {
+  ciudad: 'Ciudad de ejemplo',
+  lema: 'La última mordida es tuya.',
+  lugar: 'LUGAR DE EJEMPLO',
+  fecha_texto: '17 Y 18 OCT',
 };
 
 const burger8 = { id: 'demo-8', nombre: 'La Llanera', restaurante: 'Siria', categoria: '8_dolares' };
@@ -21,18 +22,21 @@ const burger10 = {
 };
 
 function Bienvenida() {
-  // &ahora=... simula la hora; &inicio=... &fin=... cambian las fechas (ver faseEvento.js).
-  // &fase=durante fuerza el mensaje "abre en breve".
-  const fechas = fechasEvento(config) || { inicio: Date.now() + 3 * 86400000, fin: Date.now() + 5 * 86400000 };
-  const ahora = useAhora(fechas);
-  const forzarDurante = new URLSearchParams(window.location.search).get('fase') === 'durante';
-  const fase = forzarDurante || ahora >= fechas.inicio ? 'durante' : 'antes';
+  // &fase=pausada muestra el mensaje "abre en breve"; por defecto, cuenta regresiva a 3 dias.
+  const pausada = new URLSearchParams(window.location.search).get('fase') === 'pausada';
+  const [objetivo] = useState(() => Date.now() + 3 * 86400000);
+  const [ahora, setAhora] = useState(Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setAhora(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <PantallaBienvenida
-      config={config}
-      fase={fase}
-      falta={fechas.inicio - ahora}
+      evento={evento}
+      fase={pausada ? 'pausada' : 'antes'}
+      falta={Math.max(0, objetivo - ahora)}
       onVerMenu={() => {}}
     />
   );

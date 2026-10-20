@@ -158,7 +158,7 @@ function TablaSenal({ titulo, ayuda, columnas, filas }) {
   );
 }
 
-export default function AlertasFraude() {
+export default function AlertasFraude({ evento }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [lastRun, setLastRun] = useState('');
@@ -168,20 +168,21 @@ export default function AlertasFraude() {
     setBusy(true);
     setError('');
 
-    const [votosResult, hamburguesasResult, dominiosResult, dispositivosResult, ubicacionResult, filtroResult] =
+    const [votosResult, hamburguesasResult, dominiosResult, dispositivosResult, ubicacionResult] =
       await Promise.all([
       fetchAllRows(() =>
         supabase
           .from('votos')
           .select('id, participante_id, hamburguesa_id, votado_en')
+          .eq('evento_id', evento.id)
           .order('id', { ascending: true })
       ),
       fetchAllRows(() =>
-        supabase.from('hamburguesas').select('id, restaurante').order('id', { ascending: true })
+        supabase.from('hamburguesas').select('id, restaurante').eq('evento_id', evento.id).order('id', { ascending: true })
       ),
       // Los dominios comunes se excluyen en el servidor para traer solo correos no comunes.
       fetchAllRows(() => {
-        let query = supabase.from('participantes').select('id, correo');
+        let query = supabase.from('participantes').select('id, correo').eq('evento_id', evento.id);
         for (const dominio of DOMINIOS_COMUNES) {
           query = query.not('correo', 'ilike', `%@${dominio}`);
         }
@@ -191,6 +192,7 @@ export default function AlertasFraude() {
         supabase
           .from('participantes')
           .select('id, device_id')
+          .eq('evento_id', evento.id)
           .not('device_id', 'is', null)
           .order('id', { ascending: true })
       ),
@@ -198,9 +200,9 @@ export default function AlertasFraude() {
         supabase
           .from('participantes')
           .select('id, zona_horaria, pais, revision')
+          .eq('evento_id', evento.id)
           .order('id', { ascending: true })
       ),
-      supabase.from('config').select('valor').eq('clave', 'filtro_zona_horaria').maybeSingle(),
     ]);
 
     const failed =
@@ -323,7 +325,8 @@ export default function AlertasFraude() {
         celdas: [row.restaurante, row.fueraZona, row.fueraPais, row.total, `${Math.round(row.pct)}%`],
       }));
 
-    const filtroValor = filtroResult.error ? null : filtroResult.data?.valor ?? null;
+    // El interruptor del filtro vive en el evento (eventos.filtro_zona_horaria)
+    const filtroValor = evento.filtro_zona_horaria ? 'si' : 'no';
 
     setSenales({ rafagas, dominios, horas, dispositivos, ubicacion, filtroValor, excluidosManual });
     setLastRun(lastRunFormatter.format(new Date()));

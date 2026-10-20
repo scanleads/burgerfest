@@ -7,24 +7,43 @@ import RegistroForm from './components/RegistroForm.jsx';
 import RevisionVoto from './components/RevisionVoto.jsx';
 import VotacionCategoria from './components/VotacionCategoria.jsx';
 import { getDeviceId } from './lib/device.js';
-import { fechasEvento } from './lib/faseEvento.js';
+import { slugDeUrl, useEventoActual } from './lib/evento.js';
 import { supabase } from './lib/supabase.js';
 
 const CATEGORY_8 = '8_dolares';
 const CATEGORY_10 = '10_dolares';
 const CATEGORIES = [CATEGORY_8, CATEGORY_10];
 
+// Pantallas del flujo en las que una votacion cerrada saca al usuario (la confirmacion final se conserva)
+const STATUS_EN_FLUJO = ['loading', 'registro', 'voto_8', 'voto_10', 'revision'];
+
+function tieneCodigo(error, codigo) {
+  return String(error?.message || '').includes(codigo);
+}
+
 function friendlySupabaseError(error) {
   if (!error) {
     return 'Ocurrio un error inesperado. Intenta de nuevo.';
   }
 
-  if (String(error.message || '').includes('dominio_bloqueado')) {
+  if (tieneCodigo(error, 'dominio_bloqueado')) {
     return 'Usa tu correo personal para votar.';
   }
 
-  if (String(error.message || '').includes('consentimiento_requerido')) {
+  if (tieneCodigo(error, 'consentimiento_requerido')) {
     return 'Para votar necesitas aceptar recibir información. Marca la casilla y continúa.';
+  }
+
+  if (tieneCodigo(error, 'correo_en_otro_evento')) {
+    return 'Este correo ya participó en otra edición. Usa otro correo para votar en esta.';
+  }
+
+  if (tieneCodigo(error, 'evento_no_disponible')) {
+    return 'Este evento ya no está disponible.';
+  }
+
+  if (tieneCodigo(error, 'votacion_cerrada')) {
+    return 'La votación está cerrada en este momento.';
   }
 
   return 'No pudimos conectar con la base de datos. Revisa tu senal e intenta otra vez.';
@@ -36,13 +55,6 @@ function zonaHoraria() {
   } catch {
     return null;
   }
-}
-
-function normalizeConfig(rows = []) {
-  return rows.reduce((acc, row) => {
-    acc[row.clave] = row.valor;
-    return acc;
-  }, {});
 }
 
 function nextStepFromVotes(votesByCategory) {
@@ -66,9 +78,12 @@ function categoryFromStatus(status) {
 }
 
 export default function App() {
+  const slug = useMemo(slugDeUrl, []);
+  const { estado: estadoEvento, evento, refrescar } = useEventoActual(slug);
+
   const [status, setStatus] = useState('loading');
-  const [config, setConfig] = useState({});
   const [hamburguesas, setHamburguesas] = useState([]);
+  const [menuCargadoDe, setMenuCargadoDe] = useState(null);
   const [participante, setParticipante] = useState(null);
   const [votesByCategory, setVotesByCategory] = useState({});
   const [selectedByCategory, setSelectedByCategory] = useState({});
@@ -78,62 +93,50 @@ export default function App() {
   const [showMenu, setShowMenu] = useState(false);
 
   const activeCategory = categoryFromStatus(status);
+  const eventoId = evento?.id ?? null;
+  const eventoSlug = evento?.slug ?? slug;
+  const abierto = Boolean(evento?.abierto);
 
+  // Menu del evento (se carga una vez por evento; se puede ver aunque la votacion este cerrada)
   useEffect(() => {
-    async function boot() {
-      setStatus('loading');
+    if (!eventoId) return undefined;
 
-      const { data, error: configError } = await supabase
-        .from('config')
-        .select('clave, valor');
+    let activo = true;
 
-      if (configError) {
-        setConfig({
-          titulo_evento: 'Burger Fest Barquisimeto 2026',
-          ciudad_activa: 'Barquisimeto',
-          mensaje_cierre:
-            'No pudimos verificar si la votacion esta abierta. Intenta de nuevo en unos minutos.',
-        });
-        setStatus('cerrado');
-        return;
-      }
+    supabase.rpc('menu_evento_v2', { p_slug: eventoSlug }).then(({ data, error: menuError }) => {
+      if (!activo) return;
 
-      const loadedConfig = normalizeConfig(data);
-      setConfig(loadedConfig);
-
-      if (loadedConfig.estado !== 'abierto') {
-        // Votacion cerrada: si hay fechas de evento validas, cargar el menu (solo lectura).
-        if (fechasEvento(loadedConfig)) {
-          const { data: closedBurgers } = await supabase
-            .from('hamburguesas')
-            .select('id, nombre, restaurante, categoria, foto_url, descripcion, orden, activa')
-            .eq('activa', true)
-            .order('orden', { ascending: true });
-
-          setHamburguesas(closedBurgers || []);
-        }
-
-        setStatus('cerrado');
-        return;
-      }
-
-      const { data: burgers, error: burgerError } = await supabase
-        .from('hamburguesas')
-        .select('id, nombre, restaurante, categoria, foto_url, descripcion, orden, activa')
-        .eq('activa', true)
-        .order('orden', { ascending: true });
-
-      if (burgerError) {
-        setError(friendlySupabaseError(burgerError));
+      if (menuError) {
+        setError(friendlySupabaseError(menuError));
       } else {
-        setHamburguesas(burgers || []);
+        setHamburguesas(data || []);
       }
+      setMenuCargadoDe(eventoId);
+    });
 
-      setStatus('registro');
+    return () => {
+      activo = false;
+    };
+  }, [eventoId, eventoSlug]);
+
+  // Que pantalla corresponde segun el estado del evento (siempre calculado en el servidor)
+  useEffect(() => {
+    if (estadoEvento === 'loading') return;
+
+    if (estadoEvento !== 'ok' || !evento) {
+      // Sin evento (error de red o evento no disponible): pantalla de cerrado, salvo la confirmacion final
+      setStatus((actual) => (actual === 'confirmacion' ? actual : 'cerrado'));
+      return;
     }
 
-    boot();
-  }, []);
+    if (abierto) {
+      // Con la votacion abierta se espera al menu para no mostrar el flujo sin hamburguesas
+      if (menuCargadoDe !== eventoId) return;
+      setStatus((actual) => (actual === 'loading' || actual === 'cerrado' ? 'registro' : actual));
+    } else {
+      setStatus((actual) => (STATUS_EN_FLUJO.includes(actual) ? 'cerrado' : actual));
+    }
+  }, [estadoEvento, evento, abierto, eventoId, menuCargadoDe]);
 
   const burgersByCategory = useMemo(() => {
     return CATEGORIES.reduce((acc, category) => {
@@ -143,8 +146,9 @@ export default function App() {
   }, [hamburguesas]);
 
   async function loadParticipantVotes(participanteId) {
-    const { data, error: votesError } = await supabase.rpc('mis_categorias_votadas', {
+    const { data, error: votesError } = await supabase.rpc('mis_categorias_votadas_v2', {
       p_participante_id: participanteId,
+      p_slug: eventoSlug,
     });
 
     if (votesError) {
@@ -161,13 +165,17 @@ export default function App() {
     return nextVotes;
   }
 
+  // La votacion se cerro (o el evento ya no existe) mientras la persona estaba en el flujo
+  function irACerrado() {
+    setStatus((actual) => (actual === 'confirmacion' ? actual : 'cerrado'));
+    refrescar();
+  }
+
   async function handleRegister(form) {
     setBusy(true);
     setError('');
 
-    const ciudad = config.ciudad_activa || 'Barquisimeto';
-
-    const { data: participanteId, error: rpcError } = await supabase.rpc('registrar_participante', {
+    const { data: participanteId, error: rpcError } = await supabase.rpc('registrar_participante_v2', {
       p_nombre: form.nombre,
       p_apellido: form.apellido,
       p_correo: form.correo,
@@ -175,17 +183,27 @@ export default function App() {
       p_hamburguesas_probadas: form.hamburguesas_probadas || null,
       p_acepta_marketing: form.acepta_marketing || false,
       p_device_id: getDeviceId(),
-      p_ciudad: ciudad,
       p_zona_horaria: zonaHoraria(),
+      p_slug: eventoSlug,
     });
 
     if (rpcError || !participanteId) {
       setBusy(false);
+
+      if (tieneCodigo(rpcError, 'votacion_cerrada')) {
+        irACerrado();
+        return;
+      }
+
+      if (tieneCodigo(rpcError, 'evento_no_disponible')) {
+        refrescar();
+      }
+
       setError(friendlySupabaseError(rpcError));
       return;
     }
 
-    setParticipante({ id: participanteId, ciudad });
+    setParticipante({ id: participanteId });
     const loadedVotes = await loadParticipantVotes(participanteId);
     const nextStep = nextStepFromVotes(loadedVotes);
     setStatus(nextStep === 'confirmacion' ? 'confirmacion' : statusFromCategory(nextStep));
@@ -296,11 +314,11 @@ export default function App() {
         return;
       }
 
-      const { data: resultado, error: voteError } = await supabase.rpc('registrar_voto', {
+      const { data: resultado, error: voteError } = await supabase.rpc('registrar_voto_v2', {
         p_participante_id: participante.id,
         p_hamburguesa_id: burger.id,
         p_categoria: category,
-        p_ciudad: participante.ciudad || config.ciudad_activa || 'Barquisimeto',
+        p_slug: eventoSlug,
       });
 
       if (voteError) {
@@ -310,10 +328,10 @@ export default function App() {
         return;
       }
 
-      if (resultado === 'cerrado') {
+      if (resultado === 'cerrado' || resultado === 'evento_no_disponible') {
         setVotesByCategory(nextVotes);
         setBusy(false);
-        setStatus('cerrado');
+        irACerrado();
         return;
       }
 
@@ -351,8 +369,7 @@ export default function App() {
   }
 
   if (status === 'cerrado') {
-    const fechas = fechasEvento(config);
-    const puedeVerMenu = Boolean(fechas) && hamburguesas.length > 0;
+    const puedeVerMenu = hamburguesas.length > 0;
 
     if (showMenu && puedeVerMenu) {
       return (
@@ -366,8 +383,8 @@ export default function App() {
 
     return (
       <PantallaCerrada
-        config={config}
-        fechas={fechas}
+        evento={evento}
+        estado={estadoEvento}
         onVerMenu={puedeVerMenu ? () => setShowMenu(true) : undefined}
       />
     );
@@ -384,7 +401,7 @@ export default function App() {
         busy={busy}
         error={error}
         onVerMenu={() => setShowMenu(true)}
-        config={config}
+        evento={evento}
       />
     );
   }

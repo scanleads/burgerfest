@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase.js';
 const EMPTY_DISTRIBUTION = { '1-2': 0, '3-4': 0, '5+': 0 };
 const OPCIONES_PROBADAS = Object.keys(EMPTY_DISTRIBUTION);
 
-export default function Metricas() {
+export default function Metricas({ evento }) {
   const [metrics, setMetrics] = useState({
     participantes: 0,
     votos8: 0,
@@ -27,23 +27,27 @@ export default function Metricas() {
       votos10Result,
       ...probadasResults
     ] = await Promise.all([
-      supabase.from('participantes').select('id', { count: 'exact', head: true }),
+      supabase.from('participantes').select('id', { count: 'exact', head: true }).eq('evento_id', evento.id),
       supabase
         .from('participantes')
         .select('id', { count: 'exact', head: true })
+        .eq('evento_id', evento.id)
         .eq('acepta_marketing', true),
       supabase
         .from('votos')
         .select('id', { count: 'exact', head: true })
+        .eq('evento_id', evento.id)
         .eq('categoria', '8_dolares'),
       supabase
         .from('votos')
         .select('id', { count: 'exact', head: true })
+        .eq('evento_id', evento.id)
         .eq('categoria', '10_dolares'),
       ...OPCIONES_PROBADAS.map((opcion) =>
         supabase
           .from('participantes')
           .select('id', { count: 'exact', head: true })
+          .eq('evento_id', evento.id)
           .eq('hamburguesas_probadas', opcion),
       ),
     ]);
@@ -75,7 +79,7 @@ export default function Metricas() {
 
   useEffect(() => {
     loadMetrics();
-  }, []);
+  }, [evento.id]);
 
   return (
     <section className="border-2 border-vino-oscuro bg-vino/45 p-5 shadow-hard">

@@ -9,7 +9,7 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-export default function RegistroForm({ onSubmit, busy, error, onVerMenu, config }) {
+export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento }) {
   const [form, setForm] = useState({
     nombre: '',
     apellido: '',
@@ -68,7 +68,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, config 
       <section className="mx-auto w-full max-w-md">
         <header className="mb-7 text-center">
           <p className="inline-block border-2 border-vino-oscuro bg-crema px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-vino-oscuro shadow-hard sm:px-5 sm:py-2 sm:text-sm">
-            El festival de hamburguesas · {config?.ciudad_activa || 'Barquisimeto'} 2026
+            El festival de hamburguesas{evento?.ciudad ? ` · ${evento.ciudad}` : ''}
           </p>
           <img
             src={logoBurgerFest}

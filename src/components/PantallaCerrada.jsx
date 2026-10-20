@@ -1,34 +1,44 @@
-import { faseEvento, useAhora } from '../lib/faseEvento.js';
+import { aMs, useAhoraServidor } from '../lib/evento.js';
 import PantallaBienvenida from './PantallaBienvenida.jsx';
 import PieProductora from './PieProductora.jsx';
 
-export default function PantallaCerrada({ config, fechas = null, onVerMenu }) {
-  const ahora = useAhora(fechas);
-  const fase = faseEvento(fechas, ahora);
+// estado: 'ok' | 'no_disponible' | 'error' (resultado de evento_actual). evento: JSON de evento_actual (null si no hay).
+export default function PantallaCerrada({ evento, estado = 'ok', onVerMenu }) {
+  const fase = evento?.fase;
+  const abreMs = aMs(evento?.abre_en);
+  const cuentaRegresiva = fase === 'antes' && abreMs !== null;
+  const ahora = useAhoraServidor(cuentaRegresiva);
 
-  if (fase === 'antes' || fase === 'durante') {
+  if (estado === 'ok' && (cuentaRegresiva || fase === 'pausada')) {
     return (
       <PantallaBienvenida
-        config={config}
-        fase={fase}
-        falta={fechas.inicio - ahora}
+        evento={evento}
+        fase={cuentaRegresiva ? 'antes' : 'pausada'}
+        falta={cuentaRegresiva ? Math.max(0, abreMs - ahora) : 0}
         onVerMenu={onVerMenu}
       />
     );
   }
 
+  let mensaje = evento?.mensaje_cierre || 'La votacion no esta abierta en este momento.';
+  if (estado === 'error') {
+    mensaje = 'No pudimos verificar si la votacion esta abierta. Intenta de nuevo en unos minutos.';
+  } else if (estado === 'no_disponible') {
+    mensaje = 'Este evento no esta disponible.';
+  }
+
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-10">
       <section className="w-full max-w-md text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
-          {config?.ciudad_activa || 'Barquisimeto'}
-        </p>
+        {evento?.ciudad ? (
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">{evento.ciudad}</p>
+        ) : null}
         <h1 className="mt-4 font-display text-5xl font-extrabold uppercase leading-none text-white">
-          {config?.titulo_evento || 'Burger Fest'}
+          {evento?.nombre || 'Burger Fest'}
         </h1>
         <div className="mx-auto mt-6 h-1 w-24 bg-gradient-to-r from-vino to-dorado" />
         <p className="mt-7 border-2 border-vino bg-vino-oscuro px-5 py-5 text-base leading-7 text-texto-suave shadow-hard">
-          {config?.mensaje_cierre || 'La votacion no esta abierta en este momento.'}
+          {mensaje}
         </p>
         {onVerMenu ? (
           <button

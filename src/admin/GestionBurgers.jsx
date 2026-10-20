@@ -13,7 +13,7 @@ function categoryLabel(category) {
   return category === '10_dolares' ? '$10' : '$8';
 }
 
-export default function GestionBurgers() {
+export default function GestionBurgers({ evento }) {
   const [abierta, alternarSeccion] = useSeccionPlegable('gestion-burgers', false);
   const [burgers, setBurgers] = useState([]);
   const [form, setForm] = useState(INITIAL_FORM);
@@ -33,6 +33,7 @@ export default function GestionBurgers() {
     const { data, error: burgersError } = await supabase
       .from('hamburguesas')
       .select('id, nombre, restaurante, categoria, foto_url, descripcion, orden, activa, creada_en')
+      .eq('evento_id', evento.id)
       .order('categoria', { ascending: true })
       .order('orden', { ascending: true })
       .order('creada_en', { ascending: true });
@@ -48,7 +49,7 @@ export default function GestionBurgers() {
 
   useEffect(() => {
     loadBurgers();
-  }, []);
+  }, [evento.id]);
 
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -66,6 +67,7 @@ export default function GestionBurgers() {
       categoria: form.categoria,
       foto_url: form.foto_url.trim() || null,
       activa: true,
+      evento_id: evento.id,
     };
 
     const { error: insertError } = await supabase

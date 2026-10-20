@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { slugDeUrl } from '../lib/evento.js';
 import { supabase } from '../lib/supabase.js';
 import logoBurgerFest from '../assets/logo-burgerfest.png';
 import logoIkaika from '../assets/logo-ikaika.png';
@@ -198,6 +199,8 @@ export default function ResultadosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [noDisponible, setNoDisponible] = useState(false);
+  const slug = useMemo(slugDeUrl, []);
 
   async function cargarRanking(mostrarLoader) {
     if (mostrarLoader) {
@@ -205,15 +208,17 @@ export default function ResultadosPage() {
     }
     setError('');
 
-    const { data, error: rankingError } = await supabase
-      .from('ranking_hamburguesas')
-      .select('id, nombre, restaurante, categoria, foto_url, total_votos')
-      .order('categoria', { ascending: true })
-      .order('total_votos', { ascending: false });
+    // ranking_evento: sin ?e= es el evento activo; con ?e=<slug>, ese evento. Solo si sus resultados son publicos.
+    const { data, error: rankingError } = await supabase.rpc('ranking_evento', { p_slug: slug });
 
     if (rankingError) {
-      setError('No pudimos cargar los resultados. Reintentando...');
+      if (String(rankingError.message || '').includes('evento_no_disponible')) {
+        setNoDisponible(true);
+      } else {
+        setError('No pudimos cargar los resultados. Reintentando...');
+      }
     } else {
+      setNoDisponible(false);
       setRows(data || []);
       setLastUpdated(new Date());
     }
@@ -234,6 +239,16 @@ export default function ResultadosPage() {
       return acc;
     }, {});
   }, [rows]);
+
+  if (noDisponible) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-vino-fondo px-4 text-texto-suave">
+        <p className="text-center font-display text-4xl font-extrabold uppercase text-crema sm:text-5xl">
+          Resultados no disponibles
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-vino-fondo px-4 py-8 text-texto-suave sm:px-8 lg:px-12 xl:py-12">

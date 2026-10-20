@@ -75,7 +75,7 @@ function cuentaEnRanking(lead, filtroZonaActivo) {
   return 'si';
 }
 
-export default function ExportarLeads() {
+export default function ExportarLeads({ evento }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -87,11 +87,12 @@ export default function ExportarLeads() {
 
     const leadSelect = interno ? [...LEAD_COLUMNS, 'ip', 'pais', 'zona_horaria', 'revision'] : LEAD_COLUMNS;
 
-    const [leadsResult, votosResult, hamburguesasResult, filtroResult] = await Promise.all([
+    const [leadsResult, votosResult, hamburguesasResult] = await Promise.all([
       fetchAllRows(() =>
         supabase
           .from('participantes')
           .select(['id', ...leadSelect].join(', '))
+          .eq('evento_id', evento.id)
           .order('registrado_en', { ascending: true })
           .order('id', { ascending: true })
       ),
@@ -99,18 +100,15 @@ export default function ExportarLeads() {
         supabase
           .from('votos')
           .select('id, participante_id, hamburguesa_id, categoria')
+          .eq('evento_id', evento.id)
           .order('id', { ascending: true })
       ),
       fetchAllRows(() =>
-        supabase.from('hamburguesas').select('id, nombre, restaurante').order('id', { ascending: true })
+        supabase.from('hamburguesas').select('id, nombre, restaurante').eq('evento_id', evento.id).order('id', { ascending: true })
       ),
-      interno
-        ? supabase.from('config').select('valor').eq('clave', 'filtro_zona_horaria').maybeSingle()
-        : Promise.resolve({ data: null, error: null }),
     ]);
 
-    const leadsError =
-      leadsResult.error || votosResult.error || hamburguesasResult.error || filtroResult.error;
+    const leadsError = leadsResult.error || votosResult.error || hamburguesasResult.error;
 
     if (leadsError) {
       setError('No pudimos descargar los leads. Revisa acceso authenticated/RLS.');
@@ -139,7 +137,8 @@ export default function ExportarLeads() {
       };
     }
 
-    const filtroZonaActivo = filtroResult.data?.valor === 'si';
+    // El interruptor del filtro vive en el evento (eventos.filtro_zona_horaria)
+    const filtroZonaActivo = Boolean(evento.filtro_zona_horaria);
 
     const filas = leads.map((lead) => {
       const voto8 = votoColumnas(lead.id, '8_dolares');
@@ -165,7 +164,9 @@ export default function ExportarLeads() {
     const date = new Date().toISOString().slice(0, 10);
 
     link.href = url;
-    link.download = interno ? `burgerfest-leads-INTERNO-antifraude-${date}.csv` : `burgerfest-leads-${date}.csv`;
+    link.download = interno
+      ? `burgerfest-leads-INTERNO-antifraude-${evento.slug}-${date}.csv`
+      : `burgerfest-leads-${evento.slug}-${date}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

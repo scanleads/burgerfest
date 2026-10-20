@@ -2,9 +2,6 @@ import logoBurgerFestColor from '../assets/logo-burgerfest-color.png';
 import PieProductora from './PieProductora.jsx';
 import Ticket, { Renglon, Separador } from './Ticket.jsx';
 
-const FECHA = '17 Y 18 OCT';
-const LUGAR = 'TERRAZA HOTEL TRINITARIAS SUITES';
-
 function pad(numero) {
   return String(numero).padStart(2, '0');
 }
@@ -35,16 +32,18 @@ function Cuenta({ milisegundos }) {
   );
 }
 
-// fase: 'antes' (cuenta regresiva) | 'durante' (votacion cerrada, abre en breve)
-export default function PantallaBienvenida({ config, fase, falta, onVerMenu }) {
-  const ciudad = config?.ciudad_activa || 'Barquisimeto';
+// evento: JSON de evento_actual (ciudad, lema, lugar, fecha_texto).
+// fase: 'antes' (cuenta regresiva, falta = milisegundos) | 'pausada' (votacion en pausa, abre en breve)
+export default function PantallaBienvenida({ evento, fase, falta, onVerMenu }) {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-10">
       <section className="w-full max-w-md text-center">
-        <h1 className="font-display text-6xl font-extrabold uppercase leading-[0.9] text-white sm:text-7xl">
-          La última mordida es tuya.
-        </h1>
+        {evento?.lema ? (
+          <h1 className="font-display text-6xl font-extrabold uppercase leading-[0.9] text-white sm:text-7xl">
+            {evento.lema}
+          </h1>
+        ) : null}
 
         <Ticket className="mt-7 text-left">
           <img
@@ -52,11 +51,13 @@ export default function PantallaBienvenida({ config, fase, falta, onVerMenu }) {
             alt="Burger Fest"
             className="mx-auto h-28 w-auto max-w-full sm:h-36"
           />
-          <p className="mt-3 text-center text-sm font-bold uppercase tracking-[0.15em]">
-            Edición {ciudad}
-          </p>
-          <p className="mt-1 text-center font-bold">{FECHA}</p>
-          <p className="text-center text-xs font-bold">{LUGAR}</p>
+          {evento?.ciudad ? (
+            <p className="mt-3 text-center text-sm font-bold uppercase tracking-[0.15em]">
+              Edición {evento.ciudad}
+            </p>
+          ) : null}
+          {evento?.fecha_texto ? <p className="mt-1 text-center font-bold">{evento.fecha_texto}</p> : null}
+          {evento?.lugar ? <p className="text-center text-xs font-bold">{evento.lugar}</p> : null}
 
           <Separador />
 
@@ -75,7 +76,7 @@ export default function PantallaBienvenida({ config, fase, falta, onVerMenu }) {
               <p className="font-display text-3xl font-extrabold uppercase leading-none">
                 La votación abre en breve
               </p>
-              <p className="mt-2 text-xs font-bold uppercase">Actualiza la página cuando abra</p>
+              <p className="mt-2 text-xs font-bold uppercase">Esta página se actualiza sola cuando abra</p>
             </div>
           )}
         </Ticket>

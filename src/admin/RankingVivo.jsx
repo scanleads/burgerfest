@@ -66,7 +66,7 @@ function CategoryRanking({ category, rows }) {
   );
 }
 
-export default function RankingVivo() {
+export default function RankingVivo({ evento }) {
   const [abierta, alternarSeccion] = useSeccionPlegable('ranking-vivo', true);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,11 +83,8 @@ export default function RankingVivo() {
     }
     setError('');
 
-    const { data, error: rankingError } = await supabase
-      .from('ranking_hamburguesas')
-      .select('id, nombre, restaurante, categoria, foto_url, total_votos')
-      .order('categoria', { ascending: true })
-      .order('total_votos', { ascending: false });
+    // ranking_evento: mismas columnas que la vista; el staff ve cualquier evento
+    const { data, error: rankingError } = await supabase.rpc('ranking_evento', { p_slug: evento.slug });
 
     if (rankingError) {
       setError('No pudimos cargar el ranking en vivo.');
@@ -95,17 +92,15 @@ export default function RankingVivo() {
       setRows(data || []);
       setLastUpdated(new Date());
 
-      // Votos en cuarentena = votos de las hamburguesas activas (las que devuelve la vista) - votos que cuenta la vista.
+      // Votos en cuarentena = votos del evento - votos que cuenta el ranking.
       // Si esta consulta falla, se registra en consola y no se muestra la linea.
-      const ids = (data || []).map((row) => row.id);
-
-      if (ids.length === 0) {
+      if ((data || []).length === 0) {
         setCuarentena(0);
       } else {
         const { count, error: countError } = await supabase
           .from('votos')
           .select('id', { count: 'exact', head: true })
-          .in('hamburguesa_id', ids);
+          .eq('evento_id', evento.id);
 
         if (countError || count === null) {
           console.error('No pudimos contar los votos en cuarentena:', countError);
@@ -126,7 +121,7 @@ export default function RankingVivo() {
     const timer = window.setInterval(() => loadRanking(false), 12000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [evento.id]);
 
   const rowsByCategory = useMemo(() => {
     return CATEGORIES.reduce((acc, category) => {
