@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { slugDeUrl } from '../lib/evento.js';
+import { cargarEvento, slugDeUrl } from '../lib/evento.js';
 import { supabase } from '../lib/supabase.js';
-import logoBurgerFest from '../assets/logo-burgerfest.png';
+import LogoEvento from '../components/LogoEvento.jsx';
 import logoIkaika from '../assets/logo-ikaika.png';
 
 const CATEGORIES = [
@@ -200,7 +200,19 @@ export default function ResultadosPage() {
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
   const [noDisponible, setNoDisponible] = useState(false);
+  const [evento, setEvento] = useState(null);
   const slug = useMemo(slugDeUrl, []);
+
+  // Solo para el logo del evento (si no se puede cargar, se muestra el texto BURGER FEST)
+  useEffect(() => {
+    let activo = true;
+    cargarEvento(slug).then((resultado) => {
+      if (activo && resultado.estado === 'ok') setEvento(resultado.evento);
+    });
+    return () => {
+      activo = false;
+    };
+  }, [slug]);
 
   async function cargarRanking(mostrarLoader) {
     if (mostrarLoader) {
@@ -254,10 +266,11 @@ export default function ResultadosPage() {
     <main className="min-h-screen bg-vino-fondo px-4 py-8 text-texto-suave sm:px-8 lg:px-12 xl:py-12">
       <div className="mx-auto max-w-7xl">
         <header className="border-b-4 border-dorado pb-6 text-center">
-          <img
-            src={logoBurgerFest}
-            alt="Burger Fest"
+          <LogoEvento
+            evento={evento}
+            variante="blanco"
             className="mx-auto h-[101px] w-auto max-w-full sm:h-[142px] xl:h-[162px]"
+            claseTexto="text-6xl sm:text-7xl xl:text-8xl"
           />
           <h1 className="mt-2 font-display text-5xl font-extrabold uppercase leading-none text-crema sm:text-7xl xl:text-8xl">
             Resultados en vivo

@@ -1,4 +1,4 @@
-import logoBurgerFestColor from '../assets/logo-burgerfest-color.png';
+import LogoEvento from './LogoEvento.jsx';
 import PieProductora from './PieProductora.jsx';
 import Ticket, { Renglon, Separador } from './Ticket.jsx';
 
@@ -46,10 +46,11 @@ export default function PantallaBienvenida({ evento, fase, falta, onVerMenu }) {
         ) : null}
 
         <Ticket className="mt-7 text-left">
-          <img
-            src={logoBurgerFestColor}
-            alt="Burger Fest"
+          <LogoEvento
+            evento={evento}
+            variante="color"
             className="mx-auto h-28 w-auto max-w-full sm:h-36"
+            claseTexto="text-6xl"
           />
           {evento?.ciudad ? (
             <p className="mt-3 text-center text-sm font-bold uppercase tracking-[0.15em]">

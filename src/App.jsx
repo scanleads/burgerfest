@@ -34,10 +34,6 @@ function friendlySupabaseError(error) {
     return 'Para votar necesitas aceptar recibir información. Marca la casilla y continúa.';
   }
 
-  if (tieneCodigo(error, 'correo_en_otro_evento')) {
-    return 'Este correo ya participó en otra edición. Usa otro correo para votar en esta.';
-  }
-
   if (tieneCodigo(error, 'evento_no_disponible')) {
     return 'Este evento ya no está disponible.';
   }

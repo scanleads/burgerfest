@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import logoBurgerFest from '../assets/logo-burgerfest.png';
+import LogoEvento from './LogoEvento.jsx';
 import PieProductora from './PieProductora.jsx';
 import { sugerirCorreo } from '../lib/sugerirCorreo.js';
 
@@ -70,10 +70,11 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
           <p className="inline-block border-2 border-vino-oscuro bg-crema px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-vino-oscuro shadow-hard sm:px-5 sm:py-2 sm:text-sm">
             El festival de hamburguesas{evento?.ciudad ? ` · ${evento.ciudad}` : ''}
           </p>
-          <img
-            src={logoBurgerFest}
-            alt="Burger Fest"
+          <LogoEvento
+            evento={evento}
+            variante="blanco"
             className="mx-auto mt-3 h-[163px] w-auto max-w-full sm:h-[222px]"
+            claseTexto="mt-3 text-7xl sm:text-8xl"
           />
           <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-texto-suave">
             Registrate una vez y elige tu hamburguesa favorita en cada categoria.
