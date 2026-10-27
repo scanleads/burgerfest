@@ -1,82 +1,57 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { aMs } from '../lib/evento.js';
 import { supabase } from '../lib/supabase.js';
-import { ZONA, fueraDeZona } from '../lib/zonaHoraria.js';
 
-// Umbrales (editar aqui). Una fila se resalta en rojo cuando llega al umbral.
-const RAFAGA_MOSTRAR = 5; // se muestra desde N votos al mismo local en el mismo minuto
-const RAFAGA_ALERTA = 10; // rojo desde N votos en el minuto
-const DOMINIO_ALERTA = 3; // registros con el mismo dominio no comun
-const HORA_TOP = 10; // filas mostradas en concentracion por hora
-const HORA_PCT_ALERTA = 40; // rojo si el local tiene >= este % de los votos de esa hora...
-const HORA_MIN_VOTOS = 20; // ...Y al menos estos votos
-const DISPOSITIVO_MOSTRAR = 2; // se muestra un device_id con MAS de N registros
-const DISPOSITIVO_ALERTA = 10; // rojo desde N registros...
-const DISPOSITIVO_PCT_ALERTA = 50; // ...Y si el local mas votado tiene >= este % de sus votos
-const DEVICE_CHARS = 12; // caracteres del device_id que se muestran
-const UBICACION_MOSTRAR = 1; // se muestra un local con al menos N votos fuera de zona o de pais
-const UBICACION_ALERTA_VOTOS = 5; // rojo desde N votos fuera de zona horaria...
-const UBICACION_ALERTA_PCT = 20; // ...Y si son >= este % de los votos del local
-const MAX_FILAS = 30; // filas mostradas en las demas senales
+// Las alertas las calcula el SERVIDOR (analizar_evento, cada 5 min por pg_cron) y se guardan en la tabla alertas.
+// Este panel solo las lee (RPC alertas_evento), las marca (marcar_alerta) y pide un re-analisis (reanalizar_evento).
+// Los umbrales viven en la tabla umbrales_alerta (se cambian por SQL, sin deploy): los textos de ayuda los leen de
+// estado_analisis. Las alertas son de OBSERVACION: nunca ponen a nadie en cuarentena.
 
-const DOMINIOS_COMUNES = [
-  'gmail.com',
-  'hotmail.com',
-  'hotmail.es',
-  'outlook.com',
-  'outlook.es',
-  'yahoo.com',
-  'yahoo.es',
-  'icloud.com',
-  'live.com',
-  'me.com',
-];
-
-const PAIS_LOCAL = 'VE';
 const PAGE_SIZE = 1000;
+const REFRESCO_MS = 60000;
+const DEVICE_CHARS = 12; // caracteres del device_id que se muestran
 
-const partsFormatter = new Intl.DateTimeFormat('en-GB', {
-  timeZone: ZONA,
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  hourCycle: 'h23',
-});
+const ERRORES = {
+  no_autorizado: 'No tienes permiso para esta accion.',
+  evento_no_encontrado: 'El evento ya no existe. Refresca la pagina.',
+  estado_invalido: 'Estado no valido.',
+};
 
-const lastRunFormatter = new Intl.DateTimeFormat('es-VE', {
-  timeZone: ZONA,
-  day: '2-digit',
-  month: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-  hour12: false,
-});
-
-function partsVenezuela(iso) {
-  const parts = {};
-  for (const part of partsFormatter.formatToParts(new Date(iso))) {
-    parts[part.type] = part.value;
-  }
-  return parts;
+function mensajeError(error, defecto) {
+  const texto = String(error?.message || '');
+  const codigo = Object.keys(ERRORES).find((clave) => texto.includes(clave));
+  return codigo ? ERRORES[codigo] : defecto;
 }
 
-function minutoKey(iso) {
-  const p = partsVenezuela(iso);
-  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
-}
+const lastRunFormatter = (zona) =>
+  new Intl.DateTimeFormat('es-VE', {
+    timeZone: zona,
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 
-function horaKey(iso) {
-  const p = partsVenezuela(iso);
-  return `${p.year}-${p.month}-${p.day} ${p.hour}:00`;
-}
-
-// "2026-10-13 15:32" -> "13/10 15:32"
+// "2026-10-13 15:32" -> "13/10 15:32" (las claves de minuto y hora ya vienen en la hora del evento)
 function mostrarKey(key) {
+  if (!key) return '-';
   const [fecha, hora] = key.split(' ');
   const [, mes, dia] = fecha.split('-');
-  return `${dia}/${mes} ${hora}`;
+  return `${dia}/${mes} ${hora.length === 2 ? `${hora}:00` : hora}`;
+}
+
+function corto(valor) {
+  const texto = String(valor || '');
+  return texto.length > DEVICE_CHARS ? `${texto.slice(0, DEVICE_CHARS)}…` : texto;
+}
+
+function pct(valor) {
+  return valor === null || valor === undefined ? '-' : `${Math.round(Number(valor))}%`;
+}
+
+function localTop(d) {
+  return d.local_top ? `${d.local_top} (${pct(d.pct_top)})` : '-';
 }
 
 async function fetchAllRows(buildQuery) {
@@ -103,16 +78,87 @@ async function fetchAllRows(buildQuery) {
   return { data: rows, error: null };
 }
 
-function contar(items, keyFn) {
-  const counts = new Map();
-  for (const item of items) {
-    const key = keyFn(item);
-    counts.set(key, (counts.get(key) || 0) + 1);
-  }
-  return counts;
+// Una tabla por senal: titulo, ayuda (con los umbrales del servidor), columnas y celdas desde detalle
+const SENALES = [
+  {
+    senal: 'rafaga',
+    titulo: 'Rafagas',
+    ayuda: (u) => `Desde ${u['rafaga.mostrar']} votos al mismo local en un minuto; rojo desde ${u['rafaga.roja']}`,
+    columnas: ['Local', 'Minuto', 'Votos'],
+    celdas: (d) => [d.local, mostrarKey(d.minuto), d.votos],
+  },
+  {
+    senal: 'concentracion_hora',
+    titulo: 'Concentracion por hora',
+    ayuda: (u) =>
+      `Rojo si el local tiene ${u['concentracion_hora.pct_roja']}% o mas de los votos de la hora y ${u['concentracion_hora.min_votos']}+ votos`,
+    columnas: ['Local', 'Hora', 'Votos', '% de la hora'],
+    celdas: (d) => [d.local, mostrarKey(d.hora), d.votos, pct(d.pct)],
+  },
+  {
+    senal: 'dominio_raro',
+    titulo: 'Dominios no comunes',
+    ayuda: (u) => `Rojo desde ${u['dominio_raro.roja']} registros con un dominio que no esta en la lista de comunes`,
+    columnas: ['Dominio', 'Registros'],
+    celdas: (d) => [d.dominio, d.registros],
+  },
+  {
+    senal: 'dispositivo',
+    titulo: 'Dispositivos repetidos',
+    ayuda: (u) =>
+      `Mas de ${u['dispositivo.mostrar']} registros con el mismo dispositivo; amarilla desde ${u['dispositivo.amarilla']} registros y ${u['dispositivo.pct_amarilla']}% o mas de sus votos al mismo local (registro asistido en los stands: no es fraude por si solo)`,
+    columnas: ['Dispositivo', 'Registros', 'Local mas votado'],
+    celdas: (d) => [corto(d.device_id), d.registros, localTop(d)],
+  },
+  {
+    senal: 'ubicacion',
+    titulo: 'Ubicacion',
+    ayuda: (u) =>
+      `Fuera de zona = zona horaria fuera de las permitidas del evento (los rescatados no cuentan); pais distinto de VE es solo informativo (VPN). Rojo desde ${u['ubicacion.roja_votos']} votos fuera de zona y ${u['ubicacion.roja_pct']}% o mas de los votos del local`,
+    columnas: ['Local', 'Fuera de zona', 'Pais distinto de VE', 'Votos del local', '% fuera de zona'],
+    celdas: (d) => [d.local, d.fuera_zona, d.fuera_pais, d.votos, pct(d.pct_fuera_zona)],
+  },
+  {
+    senal: 'velocidad',
+    titulo: 'Velocidad',
+    ayuda: (u) =>
+      `Mas de ${u['velocidad.registros']} registros de una misma IP o dispositivo en ${u['velocidad.minutos']} minutos; rojo si ademas ${u['velocidad.pct_roja']}% o mas de esos votos van a un local`,
+    columnas: ['Tipo', 'IP / dispositivo', 'Registros en la ventana', 'Local mas votado'],
+    celdas: (d) => [d.tipo === 'ip' ? 'IP' : 'Dispositivo', d.tipo === 'ip' ? d.valor : corto(d.valor), d.max_registros, localTop(d)],
+  },
+  {
+    senal: 'ip_exclusiva',
+    titulo: 'IP exclusiva de un local',
+    ayuda: (u) =>
+      `Desde ${u['ip_exclusiva.min_registros']} registros de una IP con ${u['ip_exclusiva.pct']}% o mas de sus votos a un local; rojo con ${u['ip_exclusiva.roja_registros']}+ registros o todos en menos de ${u['ip_exclusiva.roja_minutos']} min. El wifi de un hotel reparte sus votos y no sale`,
+    columnas: ['IP', 'Registros', 'Votos', 'Local', 'Duracion'],
+    celdas: (d) => [d.ip, d.registros, d.votos, localTop(d), d.duracion_min === null ? '-' : `${Math.round(Number(d.duracion_min))} min`],
+  },
+  {
+    senal: 'doble_local',
+    titulo: 'Indice de movilizacion por local',
+    ayuda: (u) =>
+      `% de los votantes del local que voto ese mismo local en todas las categorias. Amarilla desde la mediana del evento + ${u['doble_local.puntos_sobre_mediana']} puntos; rojo si ademas tiene ${u['doble_local.min_votantes_roja']}+ votantes (a) o si mas del ${u['doble_local.pct_concentracion']}% de sus ${u['doble_local.min_dobles_b']}+ "dobles" se registro en una misma hora o IP (b). Con menos de ${u['doble_local.min_locales_mediana']} locales, solo informativo`,
+    columnas: ['Local', 'Votantes', 'Mismo local', 'Indice', 'Mediana', 'Motivo'],
+    celdas: (d) => [
+      d.local,
+      d.base,
+      d.dobles,
+      pct(d.indice),
+      pct(d.mediana),
+      [d.cond_a ? '(a)' : '', d.cond_b ? `(b) hora ${pct(d.pct_misma_hora)} / IP ${pct(d.pct_misma_ip)}` : ''].filter(Boolean).join(' ') || '-',
+    ],
+  },
+];
+
+function claseFila(alerta) {
+  const base = alerta.estado === 'descartada' ? 'opacity-50 ' : '';
+  if (alerta.severidad === 'roja') return `${base}bg-dorado font-bold text-vino-oscuro`;
+  if (alerta.severidad === 'amarilla') return `${base}border-t border-vino-oscuro border-l-4 border-l-dorado text-crema`;
+  return `${base}border-t border-vino-oscuro text-crema`;
 }
 
-function TablaSenal({ titulo, ayuda, columnas, filas }) {
+function TablaSenal({ titulo, ayuda, columnas, filas, celdas, onMarcar, busy }) {
   return (
     <div>
       <p className="text-xs font-bold uppercase text-crema">{titulo}</p>
@@ -131,23 +177,51 @@ function TablaSenal({ titulo, ayuda, columnas, filas }) {
                     {columna}
                   </th>
                 ))}
+                <th className="px-2 py-1.5 font-bold uppercase">Estado</th>
               </tr>
             </thead>
             <tbody>
-              {filas.map((fila) => (
-                <tr
-                  key={fila.key}
-                  className={
-                    fila.alerta
-                      ? 'bg-dorado font-bold text-vino-oscuro'
-                      : 'border-t border-vino-oscuro text-crema'
-                  }
-                >
-                  {fila.celdas.map((celda, index) => (
+              {filas.map((alerta) => (
+                <tr key={alerta.id} className={claseFila(alerta)}>
+                  {celdas(alerta.detalle || {}).map((celda, index) => (
                     <td key={index} className="whitespace-nowrap px-2 py-1.5">
-                      {celda}
+                      {celda ?? '-'}
                     </td>
                   ))}
+                  <td className="whitespace-nowrap px-2 py-1.5">
+                    {alerta.estado === 'nueva' ? (
+                      <span className="flex gap-1">
+                        <button
+                          className="border border-current px-1.5 py-0.5 font-bold uppercase disabled:opacity-50"
+                          type="button"
+                          onClick={() => onMarcar(alerta, 'vista')}
+                          disabled={busy}
+                        >
+                          Vista
+                        </button>
+                        <button
+                          className="border border-current px-1.5 py-0.5 font-bold uppercase disabled:opacity-50"
+                          type="button"
+                          onClick={() => onMarcar(alerta, 'descartada')}
+                          disabled={busy}
+                        >
+                          Descartar
+                        </button>
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <span className="uppercase">{alerta.estado}</span>
+                        <button
+                          className="border border-current px-1.5 py-0.5 font-bold uppercase disabled:opacity-50"
+                          type="button"
+                          onClick={() => onMarcar(alerta, 'nueva')}
+                          disabled={busy}
+                        >
+                          Reabrir
+                        </button>
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -158,180 +232,87 @@ function TablaSenal({ titulo, ayuda, columnas, filas }) {
   );
 }
 
-export default function AlertasFraude({ evento }) {
+export default function AlertasFraude({ evento, version, onAnalizado }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [lastRun, setLastRun] = useState('');
-  const [senales, setSenales] = useState(null);
+  const [mensaje, setMensaje] = useState('');
+  const [alertas, setAlertas] = useState(null);
+  const [umbrales, setUmbrales] = useState({});
+  const [ultimo, setUltimo] = useState(null);
+  const [soloNuevas, setSoloNuevas] = useState(false);
 
-  async function handleAnalizar() {
-    setBusy(true);
-    setError('');
+  // Numero de la ultima carga pedida: una respuesta que llega tarde (desordenada) se descarta (M8)
+  const ultimaCarga = useRef(0);
 
-    const [votosResult, hamburguesasResult, dominiosResult, dispositivosResult, ubicacionResult] =
-      await Promise.all([
-      fetchAllRows(() =>
-        supabase
-          .from('votos')
-          .select('id, participante_id, hamburguesa_id, votado_en')
-          .eq('evento_id', evento.id)
-          .order('id', { ascending: true })
-      ),
-      fetchAllRows(() =>
-        supabase.from('hamburguesas').select('id, restaurante').eq('evento_id', evento.id).order('id', { ascending: true })
-      ),
-      // Los dominios comunes se excluyen en el servidor para traer solo correos no comunes.
-      fetchAllRows(() => {
-        let query = supabase.from('participantes').select('id, correo').eq('evento_id', evento.id);
-        for (const dominio of DOMINIOS_COMUNES) {
-          query = query.not('correo', 'ilike', `%@${dominio}`);
-        }
-        return query.order('id', { ascending: true });
-      }),
-      fetchAllRows(() =>
-        supabase
-          .from('participantes')
-          .select('id, device_id')
-          .eq('evento_id', evento.id)
-          .not('device_id', 'is', null)
-          .order('id', { ascending: true })
-      ),
-      fetchAllRows(() =>
-        supabase
-          .from('participantes')
-          .select('id, zona_horaria, pais, revision')
-          .eq('evento_id', evento.id)
-          .order('id', { ascending: true })
-      ),
+  const cargar = useCallback(async () => {
+    ultimaCarga.current += 1;
+    const esta = ultimaCarga.current;
+    const [alertasResult, estadoResult] = await Promise.all([
+      fetchAllRows(() => supabase.rpc('alertas_evento', { p_evento: evento.id, p_estado: null })),
+      supabase.rpc('estado_analisis', { p_evento: evento.id }),
     ]);
 
-    const failed =
-      votosResult.error ||
-      hamburguesasResult.error ||
-      dominiosResult.error ||
-      dispositivosResult.error ||
-      ubicacionResult.error;
-
-    if (failed) {
-      setError('No pudimos analizar los datos. Revisa tu sesion de admin e intenta de nuevo.');
-      setBusy(false);
+    if (esta !== ultimaCarga.current) {
       return;
     }
 
-    const restaurantePorId = new Map(hamburguesasResult.data.map((h) => [h.id, h.restaurante]));
-    const votosTodos = votosResult.data.map((voto) => ({
-      participante_id: voto.participante_id,
-      restaurante: restaurantePorId.get(voto.hamburguesa_id) || 'Sin local',
-      votado_en: voto.votado_en,
-    }));
-    const votos = votosTodos.filter((voto) => voto.votado_en);
-
-    const rafagas = [...contar(votos, (v) => `${v.restaurante}|${minutoKey(v.votado_en)}`)]
-      .map(([key, total]) => {
-        const [restaurante, minuto] = key.split('|');
-        return { key, restaurante, minuto, total };
-      })
-      .filter((row) => row.total >= RAFAGA_MOSTRAR)
-      .sort((a, b) => b.total - a.total)
-      .slice(0, MAX_FILAS)
-      .map((row) => ({
-        key: row.key,
-        alerta: row.total >= RAFAGA_ALERTA,
-        celdas: [row.restaurante, mostrarKey(row.minuto), row.total],
-      }));
-
-    const dominios = [
-      ...contar(dominiosResult.data, (p) => (p.correo || '').toLowerCase().split('@')[1] || '(sin dominio)'),
-    ]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, MAX_FILAS)
-      .map(([dominio, total]) => ({
-        key: dominio,
-        alerta: total >= DOMINIO_ALERTA,
-        celdas: [dominio, total],
-      }));
-
-    const totalPorHora = contar(votos, (v) => horaKey(v.votado_en));
-    const horas = [...contar(votos, (v) => `${v.restaurante}|${horaKey(v.votado_en)}`)]
-      .map(([key, total]) => {
-        const [restaurante, hora] = key.split('|');
-        const pct = (total / totalPorHora.get(hora)) * 100;
-        return { key, restaurante, hora, total, pct };
-      })
-      .sort((a, b) => b.total - a.total)
-      .slice(0, HORA_TOP)
-      .map((row) => ({
-        key: row.key,
-        alerta: row.pct >= HORA_PCT_ALERTA && row.total >= HORA_MIN_VOTOS,
-        celdas: [row.restaurante, mostrarKey(row.hora), row.total, `${Math.round(row.pct)}%`],
-      }));
-
-    // Cruce device_id -> participantes -> votos -> restaurante
-    const deviceDeParticipante = new Map(dispositivosResult.data.map((p) => [p.id, p.device_id]));
-    const votosPorDispositivo = new Map();
-    for (const voto of votosTodos) {
-      const deviceId = deviceDeParticipante.get(voto.participante_id);
-      if (!deviceId) continue;
-      if (!votosPorDispositivo.has(deviceId)) votosPorDispositivo.set(deviceId, []);
-      votosPorDispositivo.get(deviceId).push(voto.restaurante);
+    if (alertasResult.error || estadoResult.error || !estadoResult.data?.ok) {
+      setError('No pudimos leer las alertas. Revisa tu sesion de admin e intenta de nuevo.');
+      return;
     }
 
-    function localMasVotado(deviceId) {
-      const restaurantes = votosPorDispositivo.get(deviceId) || [];
-      if (restaurantes.length === 0) return { texto: '-', pct: 0 };
-      const [local, total] = [...contar(restaurantes, (r) => r)].sort((a, b) => b[1] - a[1])[0];
-      const pct = (total / restaurantes.length) * 100;
-      return { texto: `${local} (${Math.round(pct)}%)`, pct };
+    setError('');
+    setAlertas(alertasResult.data);
+    setUmbrales(estadoResult.data.umbrales || {});
+    setUltimo(aMs(estadoResult.data.ultimo_analisis));
+  }, [evento.id]);
+
+  useEffect(() => {
+    cargar();
+    // Con la pestana oculta no se consulta (M8)
+    const timer = window.setInterval(() => {
+      if (!document.hidden) cargar();
+    }, REFRESCO_MS);
+
+    return () => window.clearInterval(timer);
+  }, [cargar, version]);
+
+  async function handleReanalizar() {
+    setBusy(true);
+    setError('');
+    setMensaje('');
+
+    const { data, error: rpcError } = await supabase.rpc('reanalizar_evento', { p_evento: evento.id });
+
+    if (rpcError) {
+      setError(mensajeError(rpcError, 'No pudimos re-analizar. Intenta de nuevo.'));
+    } else if (!data?.ok) {
+      setError(`El analisis fallo en el servidor: ${data?.error || 'error desconocido'}`);
+    } else {
+      setMensaje(`Analisis listo: ${data.total} alertas (${data.nuevas} nuevas).`);
     }
 
-    const dispositivos = [...contar(dispositivosResult.data, (p) => p.device_id)]
-      .filter(([, total]) => total > DISPOSITIVO_MOSTRAR)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, MAX_FILAS)
-      .map(([deviceId, total]) => {
-        const top = localMasVotado(deviceId);
-        return {
-          key: deviceId,
-          alerta: total >= DISPOSITIVO_ALERTA && top.pct >= DISPOSITIVO_PCT_ALERTA,
-          celdas: [`${deviceId.slice(0, DEVICE_CHARS)}…`, total, top.texto],
-        };
-      });
-
-    // Ubicacion: votos por local con zona horaria fuera de America/Caracas (los que el filtro automatico quita,
-    // salvo rescatados con revision = 'valido') y votos con pais distinto de VE (solo informativo: VPN).
-    const ubicacionDe = new Map(ubicacionResult.data.map((p) => [p.id, p]));
-    const porLocal = new Map();
-    let excluidosManual = 0;
-    for (const voto of votosTodos) {
-      const p = ubicacionDe.get(voto.participante_id);
-      const fila = porLocal.get(voto.restaurante) || { total: 0, fueraZona: 0, fueraPais: 0 };
-      fila.total += 1;
-      if (p) {
-        if (p.revision === 'excluido') excluidosManual += 1;
-        if (fueraDeZona(p.zona_horaria) && p.revision !== 'valido') fila.fueraZona += 1;
-        if (p.pais && p.pais !== PAIS_LOCAL) fila.fueraPais += 1;
-      }
-      porLocal.set(voto.restaurante, fila);
-    }
-
-    const ubicacion = [...porLocal]
-      .filter(([, f]) => f.fueraZona >= UBICACION_MOSTRAR || f.fueraPais >= UBICACION_MOSTRAR)
-      .map(([restaurante, f]) => ({ restaurante, ...f, pct: (f.fueraZona / f.total) * 100 }))
-      .sort((a, b) => b.fueraZona - a.fueraZona || b.fueraPais - a.fueraPais)
-      .slice(0, MAX_FILAS)
-      .map((row) => ({
-        key: row.restaurante,
-        alerta: row.fueraZona >= UBICACION_ALERTA_VOTOS && row.pct >= UBICACION_ALERTA_PCT,
-        celdas: [row.restaurante, row.fueraZona, row.fueraPais, row.total, `${Math.round(row.pct)}%`],
-      }));
-
-    // El interruptor del filtro vive en el evento (eventos.filtro_zona_horaria)
-    const filtroValor = evento.filtro_zona_horaria ? 'si' : 'no';
-
-    setSenales({ rafagas, dominios, horas, dispositivos, ubicacion, filtroValor, excluidosManual });
-    setLastRun(lastRunFormatter.format(new Date()));
+    // onAnalizado cambia "version": eso recarga esta lista y el badge (una sola carga, M8)
+    onAnalizado?.();
     setBusy(false);
   }
+
+  async function handleMarcar(alerta, estado) {
+    setBusy(true);
+    setError('');
+    setMensaje('');
+
+    const { error: rpcError } = await supabase.rpc('marcar_alerta', { p_id: alerta.id, p_estado: estado });
+
+    if (rpcError) {
+      setError(mensajeError(rpcError, 'No pudimos marcar la alerta. Intenta de nuevo.'));
+    }
+
+    onAnalizado?.();
+    setBusy(false);
+  }
+
+  const visibles = (alertas || []).filter((alerta) => !soloNuevas || alerta.estado === 'nueva');
 
   return (
     <section className="border-2 border-vino-oscuro bg-vino/45 p-5 shadow-hard">
@@ -339,56 +320,46 @@ export default function AlertasFraude({ evento }) {
         Antifraude
       </p>
       <h2 className="mt-1 font-display text-3xl font-extrabold uppercase text-crema">Alertas</h2>
+      <p className="mt-1 text-xs font-semibold text-texto-suave">
+        Se analizan solas cada 5 minutos con la votacion abierta. Son de observacion: no ponen a nadie en cuarentena.
+      </p>
 
       <button
         className="mt-5 w-full border-2 border-vino-oscuro bg-dorado px-4 py-3 font-display text-xl font-extrabold uppercase text-vino-oscuro shadow-hard-sm transition hover:-translate-y-0.5 disabled:opacity-60"
         type="button"
-        onClick={handleAnalizar}
+        onClick={handleReanalizar}
         disabled={busy}
       >
-        {busy ? 'Analizando...' : 'Analizar ahora'}
+        {busy ? 'Analizando...' : 'Re-analizar'}
       </button>
       <p className="mt-2 text-xs font-semibold text-texto-suave">
-        {lastRun ? `Ultimo analisis: ${lastRun} (hora de Venezuela)` : 'Aun no se ha analizado.'}
+        {ultimo !== null
+          ? `Ultimo analisis: ${lastRunFormatter(evento.zona_horaria).format(new Date(ultimo))} (hora del evento)`
+          : 'Aun no se ha analizado este evento.'}
       </p>
+      <label className="mt-2 flex items-center gap-2 text-xs font-bold uppercase text-crema">
+        <input type="checkbox" checked={soloNuevas} onChange={(event) => setSoloNuevas(event.target.checked)} />
+        Solo nuevas
+      </label>
+      {mensaje ? <p className="mt-3 text-sm font-semibold text-crema">{mensaje}</p> : null}
       {error ? (
         <p className="mt-3 border border-dorado bg-vino-oscuro px-3 py-2 text-sm font-semibold text-crema">{error}</p>
       ) : null}
 
-      {senales ? (
+      {alertas ? (
         <div className="mt-5 space-y-5">
-          <TablaSenal
-            titulo="Rafagas"
-            ayuda={`Desde ${RAFAGA_MOSTRAR} votos al mismo local en un minuto; rojo desde ${RAFAGA_ALERTA}`}
-            columnas={['Local', 'Minuto', 'Votos']}
-            filas={senales.rafagas}
-          />
-          <TablaSenal
-            titulo="Dominios no comunes"
-            ayuda={`Rojo desde ${DOMINIO_ALERTA} registros`}
-            columnas={['Dominio', 'Registros']}
-            filas={senales.dominios}
-          />
-          <TablaSenal
-            titulo="Concentracion por hora"
-            ayuda={`Top ${HORA_TOP}; rojo si el local tiene ${HORA_PCT_ALERTA}% o mas de los votos de la hora y ${HORA_MIN_VOTOS}+ votos`}
-            columnas={['Local', 'Hora', 'Votos', '% de la hora']}
-            filas={senales.horas}
-          />
-          <TablaSenal
-            titulo="Dispositivos repetidos"
-            ayuda={`Mas de ${DISPOSITIVO_MOSTRAR} registros con el mismo dispositivo; rojo desde ${DISPOSITIVO_ALERTA} registros y ${DISPOSITIVO_PCT_ALERTA}% o mas de sus votos al mismo local`}
-            columnas={['Dispositivo', 'Registros', 'Local mas votado']}
-            filas={senales.dispositivos}
-          />
-          <TablaSenal
-            titulo="Ubicacion"
-            ayuda={`Filtro automatico por zona horaria: ${
-              senales.filtroValor === 'si' ? 'ACTIVO' : senales.filtroValor === 'no' ? 'APAGADO' : 'sin configurar (apagado)'
-            }. Excluidos manualmente: ${senales.excluidosManual} votos. Fuera de zona = zona distinta de America/Caracas (UTC cuenta como sin dato); con el filtro activo esos votos no suman. Pais distinto de VE es solo informativo (VPN). Rojo desde ${UBICACION_ALERTA_VOTOS} votos fuera de zona y ${UBICACION_ALERTA_PCT}% o mas de los votos del local`}
-            columnas={['Local', 'Fuera de zona', 'Pais distinto de VE', 'Votos del local', '% fuera de zona']}
-            filas={senales.ubicacion}
-          />
+          {SENALES.map((def) => (
+            <TablaSenal
+              key={def.senal}
+              titulo={def.titulo}
+              ayuda={def.ayuda(umbrales)}
+              columnas={def.columnas}
+              celdas={def.celdas}
+              filas={visibles.filter((alerta) => alerta.senal === def.senal)}
+              onMarcar={handleMarcar}
+              busy={busy}
+            />
+          ))}
         </div>
       ) : null}
     </section>

@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import PieProductora from '../components/PieProductora.jsx';
 import { registrarHoraServidor } from '../lib/evento.js';
 import { supabase } from '../lib/supabase.js';
+import Actas from './Actas.jsx';
 import AlertasFraude from './AlertasFraude.jsx';
 import ControlEvento from './ControlEvento.jsx';
+import EstadoAnalisis from './EstadoAnalisis.jsx';
 import ExportarLeads from './ExportarLeads.jsx';
 import GestionBurgers from './GestionBurgers.jsx';
 import Metricas from './Metricas.jsx';
@@ -24,7 +26,11 @@ export default function AdminDashboard({ session }) {
   const [eventoId, setEventoId] = useState(null);
   const [cargandoEventos, setCargandoEventos] = useState(true);
   const [eventosError, setEventosError] = useState('');
+  const [versionAnalisis, setVersionAnalisis] = useState(0);
   const email = session?.user?.email || 'admin';
+
+  // Un re-analisis (boton o plan B del badge) refresca el badge y la lista de alertas
+  const handleAnalizado = useCallback(() => setVersionAnalisis((version) => version + 1), []);
 
   const cargarEventos = useCallback(async () => {
     const { data, error } = await supabase.rpc('eventos_admin');
@@ -117,6 +123,15 @@ export default function AdminDashboard({ session }) {
         ) : null}
 
         {evento ? (
+          <EstadoAnalisis
+            key={`estado-${evento.id}`}
+            evento={evento}
+            version={versionAnalisis}
+            onAnalizado={handleAnalizado}
+          />
+        ) : null}
+
+        {evento ? (
           <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.55fr)]">
             <section className="space-y-6">
               <RankingVivo key={`ranking-${evento.id}`} evento={evento} />
@@ -125,7 +140,13 @@ export default function AdminDashboard({ session }) {
             <aside className="space-y-6">
               <ControlEvento evento={evento} onCambio={cargarEventos} />
               <Metricas key={`metricas-${evento.id}`} evento={evento} />
-              <AlertasFraude key={`alertas-${evento.id}`} evento={evento} />
+              <AlertasFraude
+                key={`alertas-${evento.id}`}
+                evento={evento}
+                version={versionAnalisis}
+                onAnalizado={handleAnalizado}
+              />
+              <Actas key={`actas-${evento.id}`} evento={evento} />
               {MOSTRAR_EXPORT_LEADS ? <ExportarLeads key={`leads-${evento.id}`} evento={evento} /> : null}
             </aside>
           </div>
