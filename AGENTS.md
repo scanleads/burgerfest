@@ -1,9 +1,10 @@
 # AGENTS.md — BurgerFest Votación (Scanleads)
 
-> Este archivo lo leen automáticamente las herramientas de IA de código (Kimi, Gemini/Antigravity y otras).
+> Este archivo lo leen automáticamente las herramientas de IA de código, sea cual sea la marca. Lo que importa es el **rol** de cada IA.
 > Es el **archivo principal de reglas** del proyecto. `CLAUDE.md` tiene las mismas reglas para Claude; si no coinciden, manda `AGENTS.md` y se avisa a Alberto.
 > **El repo es PÚBLICO: aquí no va nada privado** (ni datos de personas, UIDs, hashes, conteos, IPs, correos, nombres de locales ni detalles de fraude).
-> Documentación completa (privada, fuera del repo): `00_ENTREGA/HANDOFF-BURGERFEST-KIMI.md` (estado, pendientes, lecciones y prompts)
+> Documentación completa (privada, fuera del repo): `00_ENTREGA/HANDOFF-BURGERFEST-KIMI.md` (estado, pendientes, lecciones y prompts;
+> el nombre es histórico: vale para cualquier IA de Dirección)
 > y `00_ENTREGA/SISTEMA-IA/DIRECTOR-IA.md` (cómo trabaja y habla la IA). Bitácora: `00_ENTREGA/BITACORA-BURGERFEST.md`.
 
 ## Qué es
@@ -13,7 +14,9 @@ es CAPTURAR LEADS; la votación es el gancho.
 
 ## Responsables
 Responsable y quien aprueba: **Alberto** (Scanleads). Comercial: Dennis.
-Desde el 12-nov-2026: **Kimi** construye y dirige, **Gemini (Antigravity)** audita de forma independiente y Alberto hace de puente.
+Desde el 12-nov-2026: **la IA de Dirección y Constructor** planifica y construye, **el Auditor (una IA de OTRA empresa distinta de la que construye)**
+audita de forma independiente y Alberto hace de puente.
+Opción vigente: A (Dirección y Constructor = Kimi; Auditor = Gemini/Antigravity). Opciones y cómo cambiar: 00_ENTREGA/SISTEMA-IA/DIRECTOR-IA.md
 
 ## Stack (no cambiar sin aprobación)
 React 18 + Vite 5 (multi-page: index.html, admin.html, resultados.html) + Tailwind 3 ·
@@ -23,7 +26,7 @@ automático al hacer push a main) · GitHub scanleads/burgerfest (PÚBLICO).
 ## Cómo se trabaja (obligatorio)
 1. Método: plan → auditoría → OK de Alberto → construcción → auditoría independiente → OK → ensayo → definitivo → verificación → bitácora
    (detalle en `00_ENTREGA/SISTEMA-IA/DIRECTOR-IA.md` §4).
-2. **Quien construye no se audita.** El Auditor (Gemini) recibe solo las rutas de los archivos y el objetivo, nunca lo que explicó el Constructor.
+2. **Quien construye no se audita.** El Auditor (una IA de OTRA empresa distinta de la que construye) recibe solo las rutas de los archivos y el objetivo, nunca lo que explicó el Constructor.
    Si hay SQL, el Auditor lo **ejecuta** en la réplica local (ensayo, definitivo, verificación y rollback), no solo lo lee.
 3. Antes de escribir código: plan corto (archivos a tocar y en qué orden) y ESPERAR el OK de Alberto.
 4. Cambios de UI: probar en local (`npm run dev`; en local las rutas son /admin.html y /resultados.html). Solo prueba visual: ver "Peligros conocidos".

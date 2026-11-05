@@ -1,11 +1,13 @@
 # CLAUDE.md — BurgerFest Votación (Scanleads)
 
 > Claude Code lee este archivo automáticamente al abrir la carpeta.
-> **`AGENTS.md` es el archivo principal de reglas para las otras IAs (Kimi, Gemini/Antigravity).** Este archivo tiene las mismas reglas;
+> **`AGENTS.md` es el archivo principal de reglas para las otras IAs.** Este archivo tiene las mismas reglas;
 > si se cambia uno, se cambia el otro. Si no coinciden, manda `AGENTS.md` y se avisa a Alberto.
-> Documentación completa: `AGENTS.md` y `00_ENTREGA/HANDOFF-BURGERFEST-KIMI.md` (léelos si falta contexto).
+> Documentación completa: `AGENTS.md` y `00_ENTREGA/HANDOFF-BURGERFEST-KIMI.md` (léelos si falta contexto; el nombre del HANDOFF es
+> histórico: vale para cualquier IA de Dirección).
 > Responsable del proyecto: **Alberto** (Scanleads, desde el 18-oct-2026; antes Samuel y Dennis). Comercial: Dennis.
-> Desde el 12-nov-2026 el proyecto sigue con Kimi (construcción) + Gemini/Antigravity (auditoría independiente).
+> Desde el 12-nov-2026 el proyecto sigue con **la IA de Dirección y Constructor** + **el Auditor (una IA de OTRA empresa distinta de la que construye)**.
+> Opción vigente: A (Dirección y Constructor = Kimi; Auditor = Gemini/Antigravity). Opciones y cómo cambiar: 00_ENTREGA/SISTEMA-IA/DIRECTOR-IA.md
 
 ## Qué es
 Web app de votación de hamburguesas con captura de leads para la gira del Burger Fest
@@ -25,7 +27,7 @@ automático al hacer push a main) · GitHub scanleads/burgerfest (PÚBLICO).
 5. **Commits SIN líneas "Co-Authored-By" ni firma de Claude** (Vercel Hobby bloquea el deploy).
 6. Antes de un push: `git status` y confirmar que no se sube `.env`, credenciales, `00_ENTREGA/` ni `*.sql`.
 7. Nada se da por terminado sin que el responsable lo valide.
-8. Quien construye no se audita: el Auditor recibe solo las rutas y el objetivo, y si hay SQL lo ejecuta en la réplica
+8. Quien construye no se audita: el Auditor (una IA de OTRA empresa distinta de la que construye) recibe solo las rutas y el objetivo, y si hay SQL lo ejecuta en la réplica
    (método completo en `00_ENTREGA/SISTEMA-IA/DIRECTOR-IA.md`).
 
 ## Reglas de negocio
