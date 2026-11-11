@@ -32,8 +32,8 @@ export default function VotacionCategoria({
   return (
     <main className="min-h-screen px-4 py-5">
       <section className="mx-auto w-full max-w-3xl">
-        <div className="sticky top-0 z-10 -mx-4 border-b-2 border-vino-oscuro bg-vino-fondo px-4 pb-3 pt-2">
-          <div className="grid grid-cols-2 gap-2 border-2 border-vino-oscuro bg-vino-oscuro p-1">
+        <div className="barra-fija sticky top-0 z-10 -mx-4 border-b px-4 pb-3 pt-2">
+          <div className="grid grid-cols-2 gap-1 rounded-2xl border border-white/10 bg-vino-oscuro p-1">
             {Object.entries(categoryLabels).map(([key, item]) => {
               const active = categoria === key;
 
@@ -43,10 +43,10 @@ export default function VotacionCategoria({
                   type="button"
                   disabled={!canOpenCategory(key)}
                   onClick={() => onChangeCategory(key)}
-                  className={`tap-highlight-none border-2 px-3 py-3 font-display text-xl font-extrabold uppercase transition ${
+                  className={`tap-highlight-none rounded-xl px-3 py-2.5 font-display text-xl font-extrabold uppercase transition duration-200 ${
                     active
-                      ? 'border-vino-oscuro bg-dorado text-vino-oscuro'
-                      : 'border-transparent text-texto-suave disabled:text-texto-suave/40'
+                      ? 'bg-dorado text-vino-oscuro'
+                      : 'text-texto-suave disabled:text-texto-suave/40'
                   }`}
                 >
                   {item.short}
@@ -56,11 +56,11 @@ export default function VotacionCategoria({
           </div>
         </div>
 
-        <header className="mb-5 mt-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
+        <header key={categoria} className="entrada mb-5 mt-6">
+          <p className="text-xs font-semibold text-dorado">
             BurgerFest
           </p>
-          <h1 className="mt-2 font-display text-4xl font-extrabold uppercase leading-none text-white sm:text-5xl">
+          <h1 className="mt-2 font-display text-3xl font-extrabold uppercase leading-[0.95] text-white sm:text-5xl">
             {label.title}
           </h1>
           <p className="mt-3 text-sm leading-6 text-texto-suave">
@@ -69,23 +69,23 @@ export default function VotacionCategoria({
         </header>
 
         {existingVote && (
-          <div className="mb-4 border-2 border-dorado bg-vino-oscuro px-4 py-3 text-sm text-crema">
+          <div className="aviso mb-4">
             Ya registramos tu voto en esta categoria. Puedes continuar con la siguiente.
           </div>
         )}
 
         {error && (
-          <div className="mb-4 border-2 border-dorado bg-vino-oscuro px-4 py-3 text-sm text-crema">
+          <div className="aviso mb-4" role="alert">
             {error}
           </div>
         )}
 
         {hamburguesas.length === 0 ? (
-          <div className="border-2 border-vino-oscuro bg-vino-oscuro px-4 py-8 text-center text-texto-suave">
+          <div className="panel px-4 py-8 text-center text-texto-suave">
             No hay hamburguesas activas en esta categoria.
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div key={categoria} className="entrada grid grid-cols-2 gap-3 sm:gap-4">
             {hamburguesas.map((burger) => (
               <HamburguesaCard
                 key={burger.id}
@@ -100,12 +100,12 @@ export default function VotacionCategoria({
 
         <PieProductora />
 
-        <div className="sticky bottom-0 -mx-4 mt-5 border-t-2 border-vino-oscuro bg-vino-fondo px-4 py-3">
+        <div className="barra-fija sticky bottom-0 -mx-4 mt-5 border-t px-4 py-3">
           <button
             type="button"
             disabled={busy || (!selectedBurger && !existingVote)}
             onClick={onConfirm}
-            className="w-full border-2 border-vino-oscuro bg-crema px-4 py-4 font-display text-2xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-hard"
+            className="btn btn-oro"
           >
             {busy
               ? 'Continuando...'

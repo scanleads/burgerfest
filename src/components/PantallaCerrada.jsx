@@ -29,22 +29,22 @@ export default function PantallaCerrada({ evento, estado = 'ok', onVerMenu }) {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-10">
-      <section className="w-full max-w-md text-center">
+      <section className="entrada w-full max-w-md text-center">
         {evento?.ciudad ? (
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">{evento.ciudad}</p>
+          <p className="text-sm font-semibold text-dorado">{evento.ciudad}</p>
         ) : null}
-        <h1 className="mt-4 font-display text-5xl font-extrabold uppercase leading-none text-white">
+        <h1 className="mt-4 font-display text-4xl font-extrabold uppercase leading-[0.95] text-white sm:text-5xl">
           {evento?.nombre || 'Burger Fest'}
         </h1>
-        <div className="mx-auto mt-6 h-1 w-24 bg-gradient-to-r from-vino to-dorado" />
-        <p className="mt-7 border-2 border-vino bg-vino-oscuro px-5 py-5 text-base leading-7 text-texto-suave shadow-hard">
+        <div className="mx-auto mt-6 h-1 w-24 rounded-full bg-gradient-to-r from-vino to-dorado" />
+        <p className="panel mt-7 px-5 py-5 text-base leading-7 text-texto-suave">
           {mensaje}
         </p>
         {onVerMenu ? (
           <button
             type="button"
             onClick={onVerMenu}
-            className="mt-6 w-full border-2 border-vino-oscuro bg-dorado px-4 py-4 font-display text-2xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm"
+            className="btn btn-oro mt-6"
           >
             VER MENÚ
           </button>

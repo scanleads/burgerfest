@@ -4,7 +4,7 @@ export default function Loading({ message = 'Cargando votacion...' }) {
       <div className="space-y-5">
         <div className="mx-auto h-14 w-14 animate-spin rounded-full border-4 border-crema/20 border-t-dorado" />
         <div>
-          <p className="font-display text-3xl font-bold uppercase tracking-normal text-dorado">
+          <p className="font-display text-2xl font-extrabold uppercase text-dorado">
             BurgerFest
           </p>
           <p className="mt-2 text-sm text-texto-suave">{message}</p>

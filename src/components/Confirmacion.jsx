@@ -1,3 +1,4 @@
+import { SelloVoto } from './Iconos.jsx';
 import PieProductora from './PieProductora.jsx';
 import Ticket, { Renglon, Separador } from './Ticket.jsx';
 
@@ -10,8 +11,9 @@ export default function Confirmacion({ votos }) {
   return (
     <main className="min-h-screen px-4 py-8">
       <section className="mx-auto w-full max-w-md">
-        <Ticket>
-          <p className="text-center font-display text-4xl font-extrabold uppercase leading-none">
+        <SelloVoto className="mx-auto -mb-2 h-32 w-32" />
+        <Ticket className="ticket-imprime">
+          <p className="text-center font-display text-3xl font-extrabold uppercase leading-none">
             Burger Fest
           </p>
           <p className="mt-2 text-center text-xs font-bold uppercase tracking-[0.2em]">

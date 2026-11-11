@@ -182,6 +182,13 @@ export default function GestionBurgers({ evento }) {
       {/* Plegar solo oculta con CSS: el componente sigue montado y no pierde el estado de los formularios */}
       <div id="contenido-gestion-burgers" className={abierta ? '' : 'hidden'}>
 
+      {/* Etiqueta fija: en que evento se va a crear o editar (evita cargar en el evento equivocado) */}
+      <p className="mt-5 border-2 border-vino-oscuro bg-dorado px-4 py-3 font-display text-2xl font-extrabold uppercase leading-tight text-vino-oscuro">
+        Estás cargando en: {evento.nombre}
+        {evento.activo ? ' · ACTIVO' : ''}
+        {evento.es_prueba ? ' · PRUEBA' : ''}
+      </p>
+
       <form className="mt-5 grid gap-3 border-2 border-vino-oscuro bg-vino/35 p-4 md:grid-cols-5" onSubmit={handleSubmit}>
         <input
           className="border-2 border-vino-oscuro bg-blanco px-3 py-2 text-vino-oscuro outline-none focus:border-dorado"

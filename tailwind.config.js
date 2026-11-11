@@ -1,10 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,jsx}'],
+  content: ['./index.html', './admin.html', './resultados.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Barlow Condensed"', 'Inter', 'sans-serif'],
+        // Las familias salen de variables CSS: el tema "brasa" (publico) y el "clasico" (admin) usan fuentes distintas.
+        display: ['var(--fuente-display)', 'Inter', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['"Courier Prime"', '"Courier New"', 'monospace'],
       },
@@ -18,10 +19,10 @@ export default {
         'texto-suave': 'rgb(var(--texto-suave) / <alpha-value>)',
       },
       boxShadow: {
-        hard: '4px 4px 0 0 #1a1a1a',
-        'hard-sm': '2px 2px 0 0 #1a1a1a',
-        'hard-secondary': '3px 3px 0 0 #1a1a1a',
-        'hard-dorado': '4px 4px 0 0 #fbc72b',
+        hard: 'var(--sombra-hard)',
+        'hard-sm': 'var(--sombra-hard-sm)',
+        'hard-secondary': 'var(--sombra-hard-secondary)',
+        'hard-dorado': 'var(--sombra-hard-dorado)',
       },
     },
   },

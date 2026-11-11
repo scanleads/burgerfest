@@ -16,6 +16,26 @@ const MOSTRAR_EXPORT_LEADS = true;
 
 const REFRESCO_EVENTOS_MS = 30000; // el estado calculado (abierto / cerrado) cambia solo con las ventanas
 
+// El evento elegido se recuerda SOLO en esta pestaña (sessionStorage): sobrevive a una recarga (F5) y se olvida al
+// cerrar la pestaña. Una pestaña nueva vuelve a empezar en el evento activo. No guarda nada del publico.
+const CLAVE_EVENTO_ELEGIDO = 'bf-admin-evento';
+
+function leerEventoElegido() {
+  try {
+    return window.sessionStorage.getItem(CLAVE_EVENTO_ELEGIDO) || null;
+  } catch {
+    return null;
+  }
+}
+
+function guardarEventoElegido(id) {
+  try {
+    if (id) window.sessionStorage.setItem(CLAVE_EVENTO_ELEGIDO, id);
+  } catch {
+    // sin sessionStorage (modo privado estricto): el admin funciona como antes
+  }
+}
+
 function etiquetaEvento(evento) {
   return `${evento.nombre}${evento.activo ? ' · ACTIVO' : ''}${evento.es_prueba ? ' · PRUEBA' : ''}`;
 }
@@ -23,7 +43,7 @@ function etiquetaEvento(evento) {
 export default function AdminDashboard({ session }) {
   const [signOutError, setSignOutError] = useState('');
   const [eventos, setEventos] = useState([]);
-  const [eventoId, setEventoId] = useState(null);
+  const [eventoId, setEventoId] = useState(leerEventoElegido);
   const [cargandoEventos, setCargandoEventos] = useState(true);
   const [eventosError, setEventosError] = useState('');
   const [versionAnalisis, setVersionAnalisis] = useState(0);
@@ -45,7 +65,7 @@ export default function AdminDashboard({ session }) {
     const lista = data.eventos || [];
     setEventosError('');
     setEventos(lista);
-    // El evento elegido se conserva; la primera vez se usa el activo
+    // El evento elegido se conserva (tambien tras recargar la pestaña); si no hay o ya no existe, se usa el activo
     setEventoId((actual) =>
       actual && lista.some((evento) => evento.id === actual)
         ? actual
@@ -92,7 +112,10 @@ export default function AdminDashboard({ session }) {
                 <select
                   className="mt-1 block w-full border-2 border-vino-oscuro bg-vino-fondo px-2 py-2 text-sm font-semibold normal-case text-crema outline-none sm:min-w-[16rem]"
                   value={eventoId || ''}
-                  onChange={(event) => setEventoId(event.target.value)}
+                  onChange={(event) => {
+                    setEventoId(event.target.value);
+                    guardarEventoElegido(event.target.value);
+                  }}
                 >
                   {eventos.map((item) => (
                     <option key={item.id} value={item.id}>

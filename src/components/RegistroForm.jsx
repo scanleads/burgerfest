@@ -65,16 +65,17 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
 
   return (
     <main className="min-h-screen px-4 py-6">
-      <section className="mx-auto w-full max-w-md">
+      <section className="entrada mx-auto w-full max-w-md">
         <header className="mb-7 text-center">
-          <p className="inline-block border-2 border-vino-oscuro bg-crema px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-vino-oscuro shadow-hard sm:px-5 sm:py-2 sm:text-sm">
+          <p className="pastilla-viva">Votación abierta</p>
+          <p className="mt-3 text-sm font-semibold text-crema">
             El festival de hamburguesas{evento?.ciudad ? ` · ${evento.ciudad}` : ''}
           </p>
           <LogoEvento
             evento={evento}
             variante="blanco"
             className="mx-auto mt-3 h-[163px] w-auto max-w-full sm:h-[222px]"
-            claseTexto="mt-3 text-7xl sm:text-8xl"
+            claseTexto="mt-3 text-6xl sm:text-7xl"
           />
           <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-texto-suave">
             Registrate una vez y elige tu hamburguesa favorita en cada categoria.
@@ -82,7 +83,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
           <button
             type="button"
             onClick={onVerMenu}
-            className="tap-highlight-none mt-6 w-full border-2 border-vino-oscuro bg-dorado px-4 py-4 font-display text-2xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm"
+            className="btn btn-oro mt-6"
           >
             Ver menú completo
           </button>
@@ -91,7 +92,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
             <button
               type="button"
               onClick={() => setFormOpen(true)}
-              className="tap-highlight-none mt-3 w-full border-2 border-vino-oscuro bg-crema px-4 py-4 font-display text-2xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm"
+              className="btn btn-crema mt-3"
             >
               Registrarme y votar
             </button>
@@ -102,14 +103,14 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="space-y-4 border-2 border-vino bg-vino-oscuro p-4 shadow-hard"
+          className="panel entrada space-y-4 p-4"
         >
           <label className="block">
             <span className="text-sm font-semibold text-crema">Nombre</span>
             <input
               value={form.nombre}
               onChange={(event) => updateField('nombre', event.target.value)}
-              className="mt-2 w-full border-2 border-vino bg-vino-fondo px-4 py-3 text-white outline-none transition focus:border-dorado"
+              className="campo"
               autoComplete="given-name"
               required
             />
@@ -120,7 +121,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
             <input
               value={form.apellido}
               onChange={(event) => updateField('apellido', event.target.value)}
-              className="mt-2 w-full border-2 border-vino bg-vino-fondo px-4 py-3 text-white outline-none transition focus:border-dorado"
+              className="campo"
               autoComplete="family-name"
               required
             />
@@ -137,7 +138,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
                   setSugerenciaCorreo(null);
                 }}
                 onBlur={() => setSugerenciaCorreo(sugerirCorreo(form.correo))}
-                className="mt-2 w-full border-2 border-vino bg-vino-fondo px-4 py-3 text-white outline-none transition focus:border-dorado"
+                className="campo"
                 autoComplete="email"
                 inputMode="email"
                 required
@@ -152,7 +153,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
                     updateField('correo', sugerenciaCorreo);
                     setSugerenciaCorreo(null);
                   }}
-                  className="border-2 border-vino-oscuro bg-dorado px-3 py-1 text-xs font-extrabold uppercase text-vino-oscuro"
+                  className="rounded-full bg-dorado px-3 py-1 text-xs font-extrabold uppercase text-vino-oscuro"
                 >
                   Sí, corregir
                 </button>
@@ -168,7 +169,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
               max="120"
               value={form.edad}
               onChange={(event) => updateField('edad', event.target.value)}
-              className="mt-2 w-full border-2 border-vino bg-vino-fondo px-4 py-3 text-white outline-none transition focus:border-dorado"
+              className="campo"
               inputMode="numeric"
               placeholder="Opcional"
             />
@@ -187,10 +188,10 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
                     key={option}
                     type="button"
                     onClick={() => updateField('hamburguesas_probadas', selected ? '' : option)}
-                    className={`tap-highlight-none border-2 px-3 py-3 font-bold transition ${
+                    className={`tap-highlight-none rounded-xl border px-3 py-3 font-bold transition ${
                       selected
-                        ? 'border-vino-oscuro bg-dorado text-vino-oscuro'
-                        : 'border-crema/40 bg-transparent text-texto-suave'
+                        ? 'border-dorado bg-dorado text-vino-oscuro'
+                        : 'border-white/20 bg-transparent text-texto-suave'
                     }`}
                   >
                     {option}
@@ -200,7 +201,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
             </div>
           </div>
 
-          <label className="flex items-start gap-3 border-2 border-vino bg-vino-fondo p-3">
+          <label className="flex items-start gap-3 rounded-xl border border-white/15 bg-vino-fondo p-3">
             <input
               type="checkbox"
               checked={form.acepta_marketing}
@@ -213,7 +214,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
           </label>
 
           {(localError || error) && (
-            <p className="border-2 border-dorado bg-vino-oscuro px-3 py-2 text-sm text-crema">
+            <p className="aviso" role="alert">
               {localError || error}
             </p>
           )}
@@ -221,7 +222,7 @@ export default function RegistroForm({ onSubmit, busy, error, onVerMenu, evento 
           <button
             type="submit"
             disabled={busy}
-            className="w-full border-2 border-vino-oscuro bg-crema px-4 py-4 font-display text-2xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm disabled:opacity-60 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-hard"
+            className="btn btn-crema"
           >
             {busy ? 'Guardando...' : 'Continuar a votar'}
           </button>

@@ -4,17 +4,42 @@
 
 :root {
   color-scheme: dark;
-  --vino-fondo: 125 27 24;
-  --vino-oscuro: 26 26 26;
-  --vino: 142 38 20;
+  /* TEMA BRASA (publico y resultados): carbon calido con resplandor de brasa. Mismos nombres de token que antes. */
+  --vino-fondo: 18 12 11;
+  --vino-oscuro: 31 22 20;
+  --vino: 176 44 30;
   --dorado: 251 199 43;
   --crema: 250 246 237;
   --blanco: 255 255 255;
-  --texto-suave: 243 227 211;
+  --texto-suave: 218 203 192;
+  --fuente-display: "Poppins";
+  --sombra-hard: 0 16px 36px -16px rgb(0 0 0 / 0.8);
+  --sombra-hard-sm: 0 6px 16px -8px rgb(0 0 0 / 0.7);
+  --sombra-hard-secondary: 0 10px 24px -12px rgb(0 0 0 / 0.75);
+  --sombra-hard-dorado: 0 0 0 2px rgb(251 199 43), 0 16px 44px -12px rgb(251 199 43 / 0.55);
+  --fondo-pagina: #120c0b;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* TEMA CLASICO (solo el admin, con <body class="tema-clasico">): exactamente los valores anteriores al rediseño. */
+body.tema-clasico {
+  --vino-fondo: 125 27 24;
+  --vino-oscuro: 26 26 26;
+  --vino: 142 38 20;
+  --texto-suave: 243 227 211;
+  --fuente-display: "Barlow Condensed";
+  --sombra-hard: 4px 4px 0 0 #1a1a1a;
+  --sombra-hard-sm: 2px 2px 0 0 #1a1a1a;
+  --sombra-hard-secondary: 3px 3px 0 0 #1a1a1a;
+  --sombra-hard-dorado: 4px 4px 0 0 #fbc72b;
+  background:
+    radial-gradient(circle at top left, rgba(94, 20, 18, 0.55), transparent 30rem),
+    radial-gradient(circle at bottom right, rgba(94, 20, 18, 0.55), transparent 30rem),
+    #7d1b18;
+  color: #f3e3d3;
 }
 
 * {
@@ -25,11 +50,25 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  background: var(--fondo-pagina);
+  color: rgb(var(--texto-suave));
+}
+
+/* Resplandor de brasa: una capa fija detras de todo (no se repinta al hacer scroll). El admin no la lleva. */
+body:not(.tema-clasico)::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
-    radial-gradient(circle at top left, rgba(94, 20, 18, 0.55), transparent 30rem),
-    radial-gradient(circle at bottom right, rgba(94, 20, 18, 0.55), transparent 30rem),
-    #7d1b18;
-  color: #f3e3d3;
+    radial-gradient(56rem 24rem at 50% -9rem, rgb(251 199 43 / 0.42), transparent 70%),
+    radial-gradient(40rem 22rem at 0% 108%, rgb(176 44 30 / 0.32), transparent 70%),
+    radial-gradient(34rem 20rem at 100% 105%, rgb(251 199 43 / 0.08), transparent 70%);
+}
+
+body:not(.tema-clasico) .font-display {
+  letter-spacing: -0.02em;
 }
 
 button,
@@ -68,5 +107,156 @@ button:disabled {
       conic-gradient(from -45deg at bottom, #000 90deg, #0000 0) top / 14px 7px repeat-x,
       linear-gradient(#000 0 0) center / 100% calc(100% - 14px) no-repeat,
       conic-gradient(from 135deg at top, #000 90deg, #0000 0) bottom / 14px 7px repeat-x;
+  }
+}
+
+/* ====== Rediseño "brasa" (nov-2026): piezas compartidas de las pantallas publicas ====== */
+@layer components {
+  .btn {
+    @apply tap-highlight-none block w-full rounded-2xl px-4 py-4 text-center font-display text-xl font-extrabold uppercase leading-tight transition duration-150 ease-out;
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.975);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+  }
+  .btn:focus-visible,
+  .campo:focus-visible {
+    outline: 3px solid rgb(var(--dorado));
+    outline-offset: 2px;
+  }
+  .btn-oro {
+    @apply bg-dorado text-vino-oscuro;
+    box-shadow: 0 14px 34px -14px rgb(251 199 43 / 0.7), inset 0 -3px 0 rgb(0 0 0 / 0.14);
+  }
+  .btn-crema {
+    @apply bg-crema text-vino-oscuro;
+    box-shadow: 0 14px 30px -16px rgb(0 0 0 / 0.9), inset 0 -3px 0 rgb(0 0 0 / 0.1);
+  }
+  .panel {
+    @apply rounded-3xl border border-white/10 bg-vino-oscuro/85 shadow-hard;
+  }
+  .campo {
+    @apply mt-2 w-full rounded-xl border border-white/15 bg-vino-fondo px-4 py-3 text-white outline-none transition focus:border-dorado;
+  }
+  .aviso {
+    @apply rounded-2xl border border-dorado/70 bg-dorado/10 px-4 py-3 text-sm text-crema;
+  }
+  .barra-fija {
+    @apply border-white/10 bg-vino-fondo/85 backdrop-blur-md;
+  }
+  .pastilla-viva {
+    @apply inline-flex items-center gap-2 rounded-full border border-dorado/50 bg-dorado/10 px-3 py-1 text-xs font-semibold text-dorado;
+  }
+  .pastilla-viva::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: rgb(var(--dorado));
+    animation: latido 1.6s ease-out infinite;
+  }
+}
+
+/* Entrada de cada pantalla (una sola animacion por cambio de paso) */
+.entrada {
+  animation: entrada 0.38s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* El ticket "sale de la impresora": el momento del voto registrado */
+.ticket-imprime {
+  animation: imprime 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: top center;
+}
+
+/* La tarjeta elegida responde al toque */
+.elegida {
+  animation: elegida 0.28s ease-out;
+}
+
+@keyframes entrada {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes imprime {
+  0% { clip-path: inset(0 0 100% 0); transform: translateY(-18px); }
+  100% { clip-path: inset(0 0 0 0); transform: none; }
+}
+
+@keyframes elegida {
+  0% { transform: scale(0.96); }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes latido {
+  0% { box-shadow: 0 0 0 0 rgb(251 199 43 / 0.7); }
+  100% { box-shadow: 0 0 0 0.6rem rgb(251 199 43 / 0); }
+}
+
+/* ====== Sello del voto registrado (SVG de Iconos.jsx) ====== */
+.sello-disco {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sello-disco 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.sello-check {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: sello-trazo 0.32s ease-out 0.38s forwards;
+}
+.sello-onda {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: sello-onda 0.8s ease-out 0.4s forwards;
+}
+.sello-chispa {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: sello-chispa 0.75s cubic-bezier(0.1, 0.7, 0.3, 1) both;
+}
+.sello + .ticket-imprime {
+  animation-delay: 0.45s;
+}
+
+@keyframes sello-disco {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+@keyframes sello-trazo {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes sello-onda {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.75); }
+}
+@keyframes sello-chispa {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1) rotate(60deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sello-disco,
+  .sello-onda,
+  .sello-chispa {
+    animation: none;
+  }
+  .sello-check {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .entrada,
+  .ticket-imprime,
+  .elegida,
+  .pastilla-viva::before {
+    animation: none;
+  }
+  .btn {
+    transition: none;
   }
 }

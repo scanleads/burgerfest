@@ -28,11 +28,11 @@ export default function RevisionVoto({
 }) {
   return (
     <main className="min-h-screen px-4 py-8">
-      <section className="mx-auto w-full max-w-md">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
+      <section className="entrada mx-auto w-full max-w-md">
+        <p className="text-xs font-semibold text-dorado">
           BurgerFest
         </p>
-        <h1 className="mt-3 font-display text-5xl font-extrabold uppercase leading-none text-white">
+        <h1 className="mt-3 font-display text-4xl font-extrabold uppercase leading-[0.95] text-white">
           Revisa tu voto
         </h1>
         <p className="mt-4 text-sm leading-6 text-texto-suave">
@@ -40,7 +40,7 @@ export default function RevisionVoto({
         </p>
 
         {error && (
-          <div className="mt-5 border-2 border-dorado bg-vino-oscuro px-4 py-3 text-sm text-crema">
+          <div className="aviso mt-5" role="alert">
             {error}
           </div>
         )}
@@ -72,7 +72,7 @@ export default function RevisionVoto({
                   type="button"
                   disabled={busy || alreadyRegistered}
                   onClick={() => onChangeCategory(category)}
-                  className="mt-3 border-2 border-[#1a1a1a] bg-transparent px-4 py-2 text-sm font-extrabold uppercase text-[#1a1a1a] transition hover:translate-x-px hover:translate-y-px disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0"
+                  className="mt-3 rounded-full border-2 border-[#1a1a1a] bg-transparent px-4 py-1.5 text-sm font-extrabold uppercase text-[#1a1a1a] transition active:bg-[#1a1a1a]/10 disabled:opacity-50"
                 >
                   {alreadyRegistered ? 'Registrado' : 'Cambiar'}
                 </button>
@@ -85,7 +85,7 @@ export default function RevisionVoto({
           type="button"
           disabled={busy}
           onClick={onVotar}
-          className="mt-6 w-full border-2 border-vino-oscuro bg-crema px-4 py-4 font-display text-3xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-hard"
+          className="btn btn-oro mt-6 text-2xl"
         >
           {busy ? 'Votando...' : 'Votar'}
         </button>

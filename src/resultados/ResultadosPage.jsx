@@ -35,7 +35,7 @@ const REFRESH_MS = 12000;
 function Foto({ url, alt }) {
   if (!url) {
     return (
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center border-2 border-vino-oscuro bg-vino-fondo font-display text-xl font-extrabold text-dorado sm:h-16 sm:w-16">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-vino-fondo font-display text-xl font-extrabold text-dorado sm:h-16 sm:w-16">
         🍔
       </div>
     );
@@ -43,7 +43,7 @@ function Foto({ url, alt }) {
 
   return (
     <img
-      className="h-14 w-14 shrink-0 border-2 border-vino-oscuro object-cover sm:h-16 sm:w-16"
+      className="h-12 w-12 shrink-0 rounded-xl object-cover sm:h-16 sm:w-16"
       src={url}
       alt={alt}
       loading="lazy"
@@ -59,13 +59,13 @@ function FilaRanking({ row, posicion, maxVotes, categoria }) {
   const esPodio = esOro || esPlataBronce;
 
   const cardSizeClass = esPodio
-    ? 'gap-4 border-4 p-4 sm:gap-5 sm:p-6'
-    : 'gap-3 border-2 p-3 sm:gap-4 sm:p-4';
+    ? 'gap-3 rounded-2xl p-3 sm:gap-5 sm:p-5'
+    : 'gap-3 rounded-2xl border p-3 sm:gap-4 sm:p-4';
   const cardColorClass = esOro
-    ? 'border-vino-oscuro bg-dorado text-vino-oscuro shadow-hard-dorado'
+    ? 'bg-dorado text-vino-oscuro shadow-hard-dorado'
     : esPlataBronce
-      ? 'border-vino-oscuro bg-crema text-vino-oscuro shadow-hard'
-      : 'border-vino-oscuro bg-vino/30 text-crema';
+      ? 'bg-crema text-vino-oscuro shadow-hard'
+      : 'border-white/10 bg-white/5 text-crema';
   const subTextClass = esPodio ? 'text-vino-oscuro/70' : 'text-texto-suave';
   const votesClass = esPodio ? 'text-vino-oscuro' : 'text-dorado';
   const barClass = esPodio ? 'bg-vino-oscuro' : categoria.barColor;
@@ -73,14 +73,14 @@ function FilaRanking({ row, posicion, maxVotes, categoria }) {
     ? 'bg-vino-oscuro text-dorado'
     : `${categoria.numberBg} ${categoria.numberText}`;
   const numberSizeClass = esPodio
-    ? 'h-14 w-14 text-3xl sm:h-20 sm:w-20 sm:text-5xl'
-    : 'h-10 w-10 text-2xl sm:h-12 sm:w-12 sm:text-3xl';
-  const nombreSizeClass = esPodio ? 'text-2xl sm:text-4xl' : 'text-lg sm:text-2xl';
+    ? 'h-11 w-11 text-2xl sm:h-16 sm:w-16 sm:text-4xl'
+    : 'h-9 w-9 text-lg sm:h-12 sm:w-12 sm:text-2xl';
+  const nombreSizeClass = esPodio ? 'text-lg sm:text-3xl' : 'text-base sm:text-xl';
 
   return (
     <article className={`flex items-center ${cardSizeClass} ${cardColorClass}`}>
       <div
-        className={`flex shrink-0 items-center justify-center border-2 border-vino-oscuro font-display font-extrabold ${numberSizeClass} ${numberBadgeClass}`}
+        className={`flex shrink-0 items-center justify-center rounded-xl font-display font-extrabold ${numberSizeClass} ${numberBadgeClass}`}
       >
         {esOro ? '👑' : posicion}
       </div>
@@ -94,15 +94,15 @@ function FilaRanking({ row, posicion, maxVotes, categoria }) {
         <p className={`truncate text-xs font-semibold sm:text-sm ${subTextClass}`}>
           {row.restaurante}
         </p>
-        <div className="mt-2 h-3 overflow-hidden border border-vino-oscuro bg-vino-fondo sm:h-4">
+        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-black/25 sm:h-3">
           <div
-            className={`h-full transition-all duration-700 ${barClass}`}
+            className={`h-full rounded-full transition-all duration-700 ${barClass}`}
             style={{ width: `${width}%` }}
           />
         </div>
       </div>
 
-      <p className={`shrink-0 font-display text-2xl font-extrabold sm:text-4xl ${votesClass}`}>
+      <p className={`shrink-0 font-display text-xl font-extrabold tabular-nums sm:text-4xl ${votesClass}`}>
         {votes}
       </p>
     </article>
@@ -119,30 +119,30 @@ function ColumnaCategoria({ categoria, filas }) {
 
   return (
     <section
-      className={`border-2 border-t-8 border-vino-oscuro ${categoria.accentBorder} bg-vino/45 p-4 shadow-hard sm:p-6`}
+      className={`panel min-w-0 border-t-4 ${categoria.accentBorder} p-3 sm:p-6`}
     >
-      <div className="flex flex-col gap-3 border-b-2 border-vino-oscuro pb-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-2 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span
-            className={`border-2 border-vino-oscuro px-3 py-1 font-display text-2xl font-extrabold uppercase sm:text-3xl ${categoria.accentBg} ${categoria.accentText}`}
+            className={`shrink-0 rounded-xl px-3 py-1 font-display text-xl font-extrabold uppercase sm:text-2xl ${categoria.accentBg} ${categoria.accentText}`}
           >
             {categoria.precio}
           </span>
-          <h2 className="font-display text-2xl font-extrabold uppercase text-crema sm:text-4xl">
+          <h2 className="font-display text-lg font-extrabold uppercase leading-tight text-crema sm:text-2xl">
             {categoria.label}
           </h2>
         </div>
-        <p className="font-display text-xl font-bold uppercase text-dorado sm:text-2xl">
+        <p className="shrink-0 whitespace-nowrap font-display text-sm font-bold uppercase text-dorado sm:text-lg">
           {total} votos totales
         </p>
       </div>
 
       {total === 0 ? (
-        <div className="mt-8 flex flex-col items-center gap-4 bg-vino-oscuro/40 px-4 py-12 text-center sm:py-20">
+        <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-white/5 px-4 py-12 text-center sm:py-20">
           <span className="text-5xl sm:text-6xl" aria-hidden="true">
             🍔
           </span>
-          <p className="font-display text-3xl font-extrabold uppercase leading-none text-dorado sm:text-5xl">
+          <p className="font-display text-2xl font-extrabold uppercase leading-none text-dorado sm:text-4xl">
             Aun no hay votos registrados
           </p>
           <p className="text-xs font-semibold uppercase tracking-wide text-texto-suave/70 sm:text-sm">
@@ -166,7 +166,7 @@ function ColumnaCategoria({ categoria, filas }) {
           {resto.length > 0 ? (
             <div className="mt-4">
               <button
-                className="w-full border-2 border-vino-oscuro bg-vino-fondo px-4 py-3 font-display text-lg font-extrabold uppercase text-crema transition hover:-translate-y-0.5"
+                className="w-full rounded-2xl border border-white/15 bg-vino-fondo px-4 py-3 font-display text-base font-extrabold uppercase text-crema transition active:bg-white/10"
                 onClick={() => setVerTodas((prev) => !prev)}
                 type="button"
               >
@@ -254,8 +254,8 @@ export default function ResultadosPage() {
 
   if (noDisponible) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-vino-fondo px-4 text-texto-suave">
-        <p className="text-center font-display text-4xl font-extrabold uppercase text-crema sm:text-5xl">
+      <main className="flex min-h-screen items-center justify-center px-4 text-texto-suave">
+        <p className="text-center font-display text-3xl font-extrabold uppercase text-crema sm:text-5xl">
           Resultados no disponibles
         </p>
       </main>
@@ -263,16 +263,16 @@ export default function ResultadosPage() {
   }
 
   return (
-    <main className="min-h-screen bg-vino-fondo px-4 py-8 text-texto-suave sm:px-8 lg:px-12 xl:py-12">
+    <main className="min-h-screen px-4 py-8 text-texto-suave sm:px-8 lg:px-12 xl:py-12">
       <div className="mx-auto max-w-7xl">
-        <header className="border-b-4 border-dorado pb-6 text-center">
+        <header className="entrada pb-6 text-center">
           <LogoEvento
             evento={evento}
             variante="blanco"
             className="mx-auto h-[101px] w-auto max-w-full sm:h-[142px] xl:h-[162px]"
-            claseTexto="text-6xl sm:text-7xl xl:text-8xl"
+            claseTexto="text-4xl sm:text-6xl"
           />
-          <h1 className="mt-2 font-display text-5xl font-extrabold uppercase leading-none text-crema sm:text-7xl xl:text-8xl">
+          <h1 className="mt-3 font-display text-3xl font-extrabold uppercase leading-none text-dorado sm:text-5xl xl:text-6xl">
             Resultados en vivo
           </h1>
           <p className="mt-3 text-sm font-semibold text-texto-suave sm:text-base">
@@ -281,7 +281,7 @@ export default function ResultadosPage() {
         </header>
 
         {error ? (
-          <p className="mt-6 border-2 border-dorado bg-vino-oscuro px-4 py-3 text-center text-sm font-semibold text-crema sm:text-base">
+          <p className="aviso mt-6 text-center font-semibold sm:text-base">
             {error}
           </p>
         ) : null}

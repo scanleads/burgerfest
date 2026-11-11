@@ -17,7 +17,7 @@ function FichaBurger({ burger, isOpen, onToggle }) {
   const isPending = description === 'Menú por confirmar';
 
   return (
-    <div className="border-2 border-vino bg-vino-fondo">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-vino-fondo">
       <div className="aspect-[4/5] w-full bg-gradient-to-br from-vino/40 via-vino/25 to-dorado/30">
         {hasImage ? (
           <img
@@ -32,24 +32,24 @@ function FichaBurger({ burger, isOpen, onToggle }) {
           />
         ) : (
           <div className="flex h-full items-center justify-center px-3 text-center">
-            <span className="break-words font-display text-2xl font-extrabold uppercase leading-none text-white drop-shadow">
+            <span className="break-words font-display text-xl font-extrabold uppercase leading-none text-white drop-shadow">
               {burger.nombre}
             </span>
           </div>
         )}
       </div>
       <div className="p-2 sm:p-3">
-        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-crema">
+        <p className="text-xs font-extrabold text-dorado">
           {categoryLabels[burger.categoria] || burger.categoria}
         </p>
-        <h3 className="mt-1 break-words font-display text-xl font-extrabold uppercase leading-tight text-white sm:text-2xl">
+        <h3 className="mt-1 break-words font-display text-lg font-extrabold uppercase leading-[1.05] text-white sm:text-2xl">
           {burger.nombre}
         </h3>
         <button
           type="button"
           onClick={onToggle}
           aria-expanded={isOpen}
-          className="tap-highlight-none mt-2 w-full border-2 border-dorado bg-transparent px-2 py-2 text-xs font-extrabold uppercase text-crema transition hover:translate-x-[2px] hover:translate-y-[2px] sm:text-sm"
+          className="tap-highlight-none mt-2 w-full rounded-xl border border-dorado/70 bg-transparent px-2 py-2 text-xs font-extrabold uppercase text-crema transition active:bg-dorado/15 sm:text-sm"
         >
           Ingredientes
         </button>
@@ -102,11 +102,11 @@ export default function MenuCompleto({ hamburguesas, onVolver, votacionAbierta =
   return (
     <main className="min-h-screen px-4 py-5">
       <section className="mx-auto w-full max-w-3xl">
-        <header className="mb-5 mt-3">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-crema">
+        <header className="entrada mb-5 mt-3">
+          <p className="text-xs font-semibold text-dorado">
             BurgerFest
           </p>
-          <h1 className="mt-2 font-display text-4xl font-extrabold uppercase leading-none text-white sm:text-5xl">
+          <h1 className="mt-2 font-display text-3xl font-extrabold uppercase leading-[0.95] text-white sm:text-5xl">
             Menú completo
           </h1>
           <p className="mt-3 text-sm leading-6 text-texto-suave">
@@ -118,9 +118,9 @@ export default function MenuCompleto({ hamburguesas, onVolver, votacionAbierta =
           {restaurantes.map(({ restaurante, burgers }) => (
             <article
               key={restaurante}
-              className="overflow-hidden border-2 border-vino/50 bg-vino-oscuro p-3 sm:p-4"
+              className="panel overflow-hidden p-3 sm:p-4"
             >
-              <h2 className="font-display text-3xl font-extrabold uppercase leading-none text-white">
+              <h2 className="font-display text-2xl font-extrabold uppercase leading-none text-white">
                 {restaurante}
               </h2>
               <div className="mt-3 grid grid-cols-2 items-start gap-3">
@@ -139,11 +139,11 @@ export default function MenuCompleto({ hamburguesas, onVolver, votacionAbierta =
 
         <PieProductora />
 
-        <div className="sticky bottom-0 -mx-4 mt-5 border-t-2 border-vino-oscuro bg-vino-fondo px-4 py-3">
+        <div className="barra-fija sticky bottom-0 -mx-4 mt-5 border-t px-4 py-3">
           <button
             type="button"
             onClick={onVolver}
-            className="w-full border-2 border-vino-oscuro bg-crema px-4 py-4 font-display text-2xl font-extrabold uppercase text-vino-oscuro shadow-hard transition hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-sm"
+            className="btn btn-oro"
           >
             {votacionAbierta ? 'YA VI EL MENÚ, QUIERO VOTAR' : 'VOLVER'}
           </button>

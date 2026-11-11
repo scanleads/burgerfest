@@ -22,9 +22,9 @@ function PuertaClave({ onDesbloquear }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-vino-fondo px-4 text-texto-suave">
+    <main className="flex min-h-screen items-center justify-center px-4 text-texto-suave">
       <form
-        className="w-full max-w-sm border-2 border-vino-oscuro bg-vino/45 p-6 shadow-hard"
+        className="panel w-full max-w-sm p-6"
         onSubmit={handleSubmit}
       >
         <h1 className="font-display text-3xl font-extrabold uppercase text-crema">
@@ -34,7 +34,7 @@ function PuertaClave({ onDesbloquear }) {
           Ingresa la clave para ver el ranking.
         </p>
         <input
-          className="mt-4 w-full border-2 border-vino-oscuro bg-vino-fondo px-3 py-2 font-semibold text-crema outline-none"
+          className="campo mt-4 font-semibold"
           type="password"
           value={clave}
           onChange={(event) => setClave(event.target.value)}
@@ -42,7 +42,7 @@ function PuertaClave({ onDesbloquear }) {
         />
         {error ? <p className="mt-2 text-sm font-semibold text-crema">{error}</p> : null}
         <button
-          className="mt-4 w-full border-2 border-vino-oscuro bg-dorado px-4 py-2 font-display text-xl font-extrabold uppercase text-vino-oscuro shadow-hard-sm transition hover:-translate-y-0.5"
+          className="btn btn-oro mt-4 py-3"
           type="submit"
         >
           Entrar
