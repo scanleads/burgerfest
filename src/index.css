@@ -260,3 +260,70 @@ button:disabled {
     transition: none;
   }
 }
+
+/* ====== Admin con el tema "brasa" (<body class="tema-admin">) ======
+   Solo CSS: no se toco ningun componente del admin. Para volver al aspecto anterior basta con poner
+   class="tema-clasico" en admin.html (y su enlace de fuentes con Barlow Condensed). */
+body.tema-admin main.bg-vino-fondo {
+  background-color: transparent;
+}
+body.tema-admin .font-display {
+  letter-spacing: -0.02em;
+}
+/* Paneles principales */
+body.tema-admin section[class*='bg-vino/45'],
+body.tema-admin form[class*='bg-vino/45'] {
+  background-color: rgb(var(--vino-oscuro) / 0.88);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 1.5rem;
+}
+/* Bloques interiores: mas oscuros que el panel para que se distingan */
+body.tema-admin .bg-vino-oscuro {
+  background-color: rgb(var(--vino-fondo));
+}
+body.tema-admin [class*='bg-vino/35'],
+body.tema-admin [class*='bg-vino/30'] {
+  background-color: rgb(255 255 255 / 0.05);
+}
+body.tema-admin button.bg-vino-oscuro {
+  background-color: rgb(255 255 255 / 0.1);
+}
+body.tema-admin button.bg-vino-oscuro:hover {
+  background-color: rgb(255 255 255 / 0.16);
+}
+/* Bordes suaves en vez de lineas negras */
+body.tema-admin .border-vino-oscuro {
+  border-color: rgb(255 255 255 / 0.12);
+}
+body.tema-admin .bg-dorado.border-vino-oscuro,
+body.tema-admin .bg-crema.border-vino-oscuro,
+body.tema-admin .bg-blanco.border-vino-oscuro {
+  border-color: transparent;
+}
+/* Esquinas redondeadas */
+body.tema-admin button,
+body.tema-admin input,
+body.tema-admin select,
+body.tema-admin textarea,
+body.tema-admin [class*='border-2'],
+body.tema-admin article {
+  border-radius: 0.8rem;
+}
+body.tema-admin input[type='checkbox'],
+body.tema-admin input[type='radio'] {
+  border-radius: 0.25rem;
+}
+body.tema-admin button:focus-visible,
+body.tema-admin input:focus-visible,
+body.tema-admin select:focus-visible {
+  outline: 3px solid rgb(var(--dorado));
+  outline-offset: 2px;
+}
+body.tema-admin [class*='border-dorado'] {
+  border-radius: 0.8rem;
+}
+/* En telefono, las tablas anchas se desplazan dentro de su panel en vez de ensanchar toda la pagina */
+body.tema-admin section,
+body.tema-admin aside {
+  min-width: 0;
+}
