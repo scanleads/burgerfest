@@ -77,7 +77,7 @@ automático al hacer push a main) · GitHub scanleads/burgerfest (PÚBLICO).
 - Flags: MOSTRAR_EXPORT_LEADS=true (AdminDashboard), REQUERIR_CLAVE=false y TOP_VISIBLE=5 (resultados).
 - Columnas de `hamburguesas`: nombre, restaurante, categoria, descripcion, foto_url, orden, activa, evento_id.
 
-## Estado actual (2-nov-2026)
+## Estado actual (11-nov-2026)
 - Plataforma v2 multi-evento en producción. La votación abre y cierra sola según `ventanas_votacion` y la hora del
   servidor; el admin tiene modo Automático / Forzar cerrado / Forzar abierto (con caducidad) y ventanas.
 - Todo INSERT lleva `evento_id` explícito. Un correo = un participante POR EVENTO.
@@ -92,6 +92,17 @@ automático al hacer push a main) · GitHub scanleads/burgerfest (PÚBLICO).
 - **Alcance para Caracas CONGELADO:** no se construyen sprints nuevos. Solo se prepara el evento (contenido, SQL de
   creación y activación, runbook y ensayo general). Única excepción posible: V2-3 (edad obligatoria y marketing solo 18+),
   si el cliente responde antes del 9-nov. Congelamiento del código: 20-nov.
+- **Interfaz "brasa" (11-nov-2026), solo front:** fondo oscuro con resplandor dorado, títulos en Poppins y tarjetas
+  redondeadas en `/`, `/resultados` y el admin. Los tokens de color conservan su nombre y sus valores están en `:root`
+  de `src/index.css`; las piezas compartidas son `.btn`, `.btn-oro`, `.btn-crema`, `.panel`, `.campo`, `.aviso` y
+  `.barra-fija`. Las sombras `shadow-hard*` y `font-display` salen de variables CSS (`tailwind.config.js`).
+- **Iconos:** SVG propios en `src/components/Iconos.jsx`. No usar emojis en la interfaz. Al registrar el voto se muestra
+  un sello animado (SVG + CSS) antes del ticket. Todo movimiento respeta `prefers-reduced-motion`.
+- **Admin:** usa `<body class="tema-admin">` (`admin.html`) y reglas solo CSS al final de `src/index.css`; para volver
+  al aspecto anterior basta `class="tema-clasico"`. El evento elegido se recuerda **por pestaña** (`sessionStorage`):
+  sobrevive a una recarga y una pestaña nueva empieza en el evento activo. Competidores muestra "Estás cargando en: …".
+  Esto no guarda nada del público: la regla de no guardar al participante en el teléfono sigue igual.
+- Los textos de botones y mensajes de las pantallas públicas no se cambian sin revisar los guiones de operación.
 - Pie de la productora (IKAIKA): `src/components/PieProductora.jsx`, en todas las pantallas públicas y en
   `AdminDashboard`; en pantallas con botón fijo abajo va antes de ese botón.
 - Las filas de `hamburguesas` con `foto_url` null muestran el nombre. Los cambios de contenido se aplican
